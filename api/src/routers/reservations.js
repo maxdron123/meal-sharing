@@ -1,9 +1,9 @@
 import express from "express";
 import knex from "../database_client.js";
 
-const router = express.Router();
+export const reservationsRouter = express.Router();
 
-router.get("/", async (req, res) => {
+reservationsRouter.get("/", async (req, res) => {
   try {
     const reservations = await knex("reservations").select("*").orderBy("id");
     res.json(reservations);
@@ -12,16 +12,30 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+reservationsRouter.post("/", async (req, res) => {
+  const {
+    number_of_guests,
+    meal_id,
+    created_date,
+    contact_phonenumber,
+    contact_name,
+    contact_email,
+  } = req.body;
+
+  if (
+    typeof number_of_guests !== "number" ||
+    typeof meal_id !== "number" ||
+    !created_date ||
+    typeof contact_phonenumber !== "number" ||
+    !contact_name ||
+    !contact_email !== "number"
+  ) {
+    return res.status(400).json({
+      error: "Invalid input",
+    });
+  }
+
   try {
-    const {
-      number_of_guests,
-      meal_id,
-      created_date,
-      contact_phonenumber,
-      contact_name,
-      contact_email,
-    } = req.body;
     const newReservation = {
       number_of_guests,
       meal_id,
@@ -44,7 +58,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+reservationsRouter.get("/:id", async (req, res) => {
   try {
     const reservationID = req.params.id;
     const reservation = await knex("reservations")
@@ -59,17 +73,36 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+reservationsRouter.put("/:id", async (req, res) => {
+  const {
+    number_of_guests,
+    meal_id,
+    created_date,
+    contact_phonenumber,
+    contact_name,
+    contact_email,
+  } = req.body;
+
+  if (
+    (number_of_guests !== undefined && typeof number_of_guests !== "number") ||
+    (meal_id !== undefined && typeof meal_id !== "number") ||
+    (created_date !== undefined && typeof created_date !== "string") ||
+    (contact_phonenumber !== undefined &&
+      typeof contact_phonenumber !== "string") ||
+    (contact_name !== undefined && typeof contact_name !== "string") ||
+    (contact_email !== undefined && typeof contact_email !== "string")
+  ) {
+    return res.status(400).json({ error: "Incorrect input" });
+  }
   try {
     const reservationID = req.params.id;
-    const {
-      number_of_guests,
-      meal_id,
-      created_date,
-      contact_phonenumber,
-      contact_name,
-      contact_email,
-    } = req.body;
+    if (
+      reservationID === undefined ||
+      isNaN(reservationID) ||
+      reservationID <= 0
+    ) {
+      return res.status(400).json({ error: "Invalid reservation ID" });
+    }
     const updatedReservation = {
       number_of_guests,
       meal_id,
@@ -93,9 +126,16 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+reservationsRouter.delete("/:id", async (req, res) => {
   try {
     const reservationID = req.params.id;
+    if (
+      reservationID === undefined ||
+      isNaN(reservationID) ||
+      reservationID <= 0
+    ) {
+      return res.status(400).json({ error: "Invalid reservation ID" });
+    }
     const deletedRows = await knex("reservations")
       .where({ id: reservationID })
       .del();
@@ -107,5 +147,3 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete reservation" });
   }
 });
-
-export default router;

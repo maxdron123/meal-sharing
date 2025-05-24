@@ -1,9 +1,9 @@
 import express from "express";
 import knex from "../database_client.js";
 
-const router = express.Router();
+export const mealsRouter = express.Router();
 
-router.get("/", async (req, res) => {
+mealsRouter.get("/", async (req, res) => {
   try {
     const meals = await knex("meals").select("*").orderBy("id");
     res.json(meals);
@@ -12,10 +12,31 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+mealsRouter.post("/", async (req, res) => {
+  const {
+    title,
+    description,
+    location,
+    when,
+    max_reservations,
+    price,
+    created_date,
+  } = req.body;
+  if (
+    !title ||
+    !description ||
+    !location ||
+    !when ||
+    typeof max_reservations !== "number" ||
+    typeof price !== "number" ||
+    !created_date
+  ) {
+    return res.status(400).json({
+      error: "Invalid input",
+    });
+  }
+
   try {
-    const { title, description, location, when, max_reservations, price } =
-      req.body;
     const newMeal = {
       title,
       description,
@@ -23,6 +44,7 @@ router.post("/", async (req, res) => {
       when,
       max_reservations,
       price,
+      created_date,
     };
     const [mealId] = await knex("meals").insert(newMeal);
     const createdMeal = await knex("meals").where({ id: mealId }).first();
@@ -32,7 +54,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+mealsRouter.get("/:id", async (req, res) => {
   try {
     const mealId = req.params.id;
     const meal = await knex("meals").where({ id: mealId }).first();
@@ -45,11 +67,33 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+mealsRouter.put("/:id", async (req, res) => {
+  const {
+    title,
+    description,
+    location,
+    when,
+    max_reservations,
+    price,
+    created_date,
+  } = req.body;
+  if (
+    (title !== undefined && typeof title !== "string") ||
+    (description !== undefined && typeof description !== "string") ||
+    (location !== undefined && typeof location !== "string") ||
+    (when !== undefined && typeof when !== "string") ||
+    (max_reservations !== undefined && typeof max_reservations !== "number") ||
+    (price !== undefined && typeof price !== "number") ||
+    (created_date !== undefined && typeof created_date !== "string")
+  ) {
+    return res.status(400).json({ error: "Incorrect input" });
+  }
+
   try {
     const mealId = req.params.id;
-    const { title, description, location, when, max_reservations, price } =
-      req.body;
+    if (mealId === undefined || isNaN(mealId) || mealId <= 0) {
+      return res.status(400).json({ error: "Invalid meal ID" });
+    }
     const updatedMeal = {
       title,
       description,
@@ -57,6 +101,7 @@ router.put("/:id", async (req, res) => {
       when,
       max_reservations,
       price,
+      created_date,
     };
     const updatedRows = await knex("meals")
       .where({ id: mealId })
@@ -71,8 +116,11 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
-  const mealID = req.params.id;
+mealsRouter.delete("/:id", async (req, res) => {
+  const mealId = req.params.id;
+  if (mealId === undefined || isNaN(mealId) || mealId <= 0) {
+    return res.status(400).json({ error: "Invalid meal ID" });
+  }
   try {
     const deletedRows = await knex("meals").where({ id: mealID }).del();
     if (deletedRows === 0) {
@@ -84,7 +132,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.get("/first-meal", async (req, res) => {
+mealsRouter.get("/first-meal", async (req, res) => {
   try {
     const meal = await knex("meals").orderBy("id", "asc").first();
     if (meal) {
@@ -97,7 +145,7 @@ router.get("/first-meal", async (req, res) => {
   }
 });
 
-router.get("/last-meal", async (req, res) => {
+mealsRouter.get("/last-meal", async (req, res) => {
   try {
     const meal = await knex("meals").orderBy("id", "desc").first();
     if (meal) {
@@ -110,7 +158,7 @@ router.get("/last-meal", async (req, res) => {
   }
 });
 
-router.get("/future-meals", async (req, res) => {
+mealsRouter.get("/future-meals", async (req, res) => {
   try {
     const meals = await knex("meals")
       .where("when", ">", knex.fn.now())
@@ -121,7 +169,7 @@ router.get("/future-meals", async (req, res) => {
   }
 });
 
-router.get("/past-meals", async (req, res) => {
+mealsRouter.get("/past-meals", async (req, res) => {
   try {
     const meals = await knex("meals")
       .where("when", "<", knex.fn.now())
@@ -131,5 +179,3 @@ router.get("/past-meals", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch past meals" });
   }
 });
-
-export default router;
