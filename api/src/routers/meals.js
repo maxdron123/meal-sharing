@@ -1,5 +1,8 @@
 import express from "express";
 import knex from "../database_client.js";
+import { StatusCodes } from "http-status-codes";
+import { validations } from "./meals_validator.js";
+import { validate } from "../validate_middleware.js";
 
 export const mealsRouter = express.Router();
 
@@ -104,7 +107,7 @@ mealsRouter.get("/", async (req, res) => {
   }
 });
 
-mealsRouter.post("/", async (req, res) => {
+mealsRouter.post("/", validate(validations.create), async (req, res) => {
   const {
     title,
     description,
@@ -114,19 +117,6 @@ mealsRouter.post("/", async (req, res) => {
     price,
     created_date,
   } = req.body;
-  if (
-    !title ||
-    !description ||
-    !location ||
-    !when ||
-    typeof max_reservations !== "number" ||
-    typeof price !== "number" ||
-    !created_date
-  ) {
-    return res.status(400).json({
-      error: "Invalid input",
-    });
-  }
 
   try {
     const newMeal = {
@@ -161,9 +151,6 @@ mealsRouter.get("/:id", async (req, res) => {
 
 mealsRouter.get("/:meal_id/reviews", async (req, res) => {
   const mealId = req.params.meal_id;
-  if (!mealId || isNaN(mealId)) {
-    return res.status(400).json({ error: "Invalid meal_id" });
-  }
   try {
     const reviews = await knex("reviews").where({ meal_id: mealId });
     res.json(reviews);
@@ -172,7 +159,8 @@ mealsRouter.get("/:meal_id/reviews", async (req, res) => {
   }
 });
 
-mealsRouter.put("/:id", async (req, res) => {
+mealsRouter.put("/:id", validate(validations.update), async (req, res) => {
+  const mealId = req.params.id;
   const {
     title,
     description,
@@ -182,23 +170,8 @@ mealsRouter.put("/:id", async (req, res) => {
     price,
     created_date,
   } = req.body;
-  if (
-    (title !== undefined && typeof title !== "string") ||
-    (description !== undefined && typeof description !== "string") ||
-    (location !== undefined && typeof location !== "string") ||
-    (when !== undefined && typeof when !== "string") ||
-    (max_reservations !== undefined && typeof max_reservations !== "number") ||
-    (price !== undefined && typeof price !== "number") ||
-    (created_date !== undefined && typeof created_date !== "string")
-  ) {
-    return res.status(400).json({ error: "Incorrect input" });
-  }
 
   try {
-    const mealId = req.params.id;
-    if (mealId === undefined || isNaN(mealId) || mealId <= 0) {
-      return res.status(400).json({ error: "Invalid meal ID" });
-    }
     const updatedMeal = {
       title,
       description,
@@ -221,17 +194,14 @@ mealsRouter.put("/:id", async (req, res) => {
   }
 });
 
-mealsRouter.delete("/:id", async (req, res) => {
+mealsRouter.delete("/:id", validate(validations.delete), async (req, res) => {
   const mealId = req.params.id;
-  if (mealId === undefined || isNaN(mealId) || mealId <= 0) {
-    return res.status(400).json({ error: "Invalid meal ID" });
-  }
   try {
-    const deletedRows = await knex("meals").where({ id: mealID }).del();
+    const deletedRows = await knex("meals").where({ id: mealId }).del();
     if (deletedRows === 0) {
       return res.status(404).json({ error: "Meal not found" });
     }
-    res.status(200).send({ success: "Meal deleted successfully" });
+    res.status(StatusCodes.NO_CONTENT).end();
   } catch {
     res.status(500).json({ error: "Failed to delete meal" });
   }

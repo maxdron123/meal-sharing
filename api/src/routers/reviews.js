@@ -1,5 +1,8 @@
 import express from "express";
 import knex from "../database_client.js";
+import { StatusCodes } from "http-status-codes";
+import { validations } from "./reviews_validator.js";
+import { validate } from "../validate_middleware.js";
 
 export const reviewsRouter = express.Router();
 
@@ -12,26 +15,15 @@ reviewsRouter.get("/", async (req, res) => {
   }
 });
 
-reviewsRouter.post("/", async (req, res) => {
-  const { id, title, description, review_id, stars, created_date } = req.body;
-  if (
-    typeof id !== "number" ||
-    !title ||
-    !description ||
-    typeof review_id !== "number" ||
-    typeof stars !== "number" ||
-    !created_date
-  ) {
-    return res.status(400).json({
-      error: "Invalid input",
-    });
-  }
+reviewsRouter.post("/", validate(validations.create), async (req, res) => {
+  const { id, title, description, meal_id, stars, created_date } = req.body;
+
   try {
     const newReview = {
       id,
       title,
       description,
-      review_id,
+      meal_id,
       stars,
       created_date,
     };
@@ -55,52 +47,24 @@ reviewsRouter.get("/:id", async (req, res) => {
   }
 });
 
-reviewsRouter.delete("/:id", async (req, res) => {
+reviewsRouter.delete("/:id", validate(validations.delete), async (req, res) => {
   try {
     const reviewId = req.params.id;
     const deletedCount = await knex("reviews").where({ id: reviewId }).del();
     if (deletedCount === 0) {
       return res.status(404).json({ error: "Review not found" });
     }
-    res.status(204).end();
+    res.status(StatusCodes.NO_CONTENT).end();
   } catch {
     res.status(500).json({ error: "Failed to delete review" });
   }
 });
 
-reviewsRouter.delete("/:id", async (req, res) => {
-  const reviewId = req.params.id;
-  if (reviewId === undefined || isNaN(reviewId) || reviewId <= 0) {
-    return res.status(400).json({ error: "Invalid review ID" });
-  }
-  try {
-    const deletedRows = await knex("reviews").where({ id: reviewID }).del();
-    if (deletedRows === 0) {
-      return res.status(404).json({ error: "review not found" });
-    }
-    res.status(202).end();
-  } catch {
-    res.status(500).json({ error: "Failed to delete review" });
-  }
-});
-
-reviewsRouter.put("/:id", async (req, res) => {
+reviewsRouter.put("/:id", validate(validations.update), async (req, res) => {
   const { title, description, review_id, stars, created_date } = req.body;
-  if (
-    (title !== undefined && typeof title !== "string") ||
-    (description !== undefined && typeof description !== "string") ||
-    (review_id !== undefined && typeof review_id !== "number") ||
-    (stars !== undefined && typeof stars !== "number") ||
-    (created_date !== undefined && typeof created_date !== "string")
-  ) {
-    return res.status(400).json({ error: "Incorrect input" });
-  }
 
   try {
     const reviewId = req.params.id;
-    if (reviewId === undefined || isNaN(reviewId) || reviewId <= 0) {
-      return res.status(400).json({ error: "Invalid review ID" });
-    }
     const updatedReview = {
       title,
       description,
