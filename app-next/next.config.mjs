@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: "export"
+  output: "export",
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:3001/api/:path*", // backend port
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -14,9 +14,10 @@ app.use(bodyParser.json());
 
 const apiRouter = express.Router();
 
-app.use("/meals", mealsRouter);
-app.use("/reservations", reservationsRouter);
-app.use("/reviews", reviewsRouter);
+apiRouter.use("/meals", mealsRouter);
+apiRouter.use("/reservations", reservationsRouter);
+apiRouter.use("/reviews", reviewsRouter);
+apiRouter.use("/nested", nestedRouter);
 
 // This nested router example can also be replaced with your own sub-router
 apiRouter.use("/nested", nestedRouter);
