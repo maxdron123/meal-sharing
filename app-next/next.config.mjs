@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
+const backendApiUrl = process.env.BACKEND_API_URL;
 const nextConfig = {
-  output: "export",
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:3001/api/:path*", // backend port
+        destination: `${backendApiUrl}/api/:path*`, // backend port
       },
     ];
   },

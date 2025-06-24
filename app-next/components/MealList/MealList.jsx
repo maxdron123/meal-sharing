@@ -9,6 +9,7 @@ export default function MealsList() {
     fetch("/api/meals")
       .then((res) => res.json())
       .then((data) => {
+        console.log("Fetched meals:", data);
         setMeals(data);
         setLoading(false);
       });
