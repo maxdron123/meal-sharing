@@ -1,8 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Meal from "./Meal.jsx";
+import styles from "./MealList.module.css";
+import Meal from "./Meal";
 
 export default function MealsList() {
   const [meals, setMeals] = useState([]);
@@ -12,7 +11,6 @@ export default function MealsList() {
     fetch("/api/meals")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched meals:", data);
         setMeals(data);
         setLoading(false);
       });
@@ -21,19 +19,22 @@ export default function MealsList() {
   if (loading) return <p>Loading meals...</p>;
 
   return (
-    <Box sx={{ width: "100%", padding: 2 }}>
-      <h2>Meals</h2>
+    <div className={styles.container}>
+      <h2 className={styles.heading}>Meals</h2>
       {meals.length === 0 ? (
         <p>No meals found.</p>
       ) : (
-        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+        <div className={styles.grid}>
           {meals.map((meal) => (
-            <Grid size={6} key={meal.id}>
-              <Meal meal={meal} />
-            </Grid>
+            <Meal
+              title={meal.title}
+              description={meal.description}
+              image={meal.image}
+              key={meal.id}
+            />
           ))}
-        </Grid>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
