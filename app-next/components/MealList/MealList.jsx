@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import styles from "./MealList.module.css";
+import Meal from "./Meal";
 
 export default function MealsList() {
   const [meals, setMeals] = useState([]);
@@ -9,7 +11,6 @@ export default function MealsList() {
     fetch("/api/meals")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched meals:", data);
         setMeals(data);
         setLoading(false);
       });
@@ -18,20 +19,21 @@ export default function MealsList() {
   if (loading) return <p>Loading meals...</p>;
 
   return (
-    <div>
-      <h2>Meals</h2>
+    <div className={styles.container}>
+      <h2 className={styles.heading}>Meals</h2>
       {meals.length === 0 ? (
         <p>No meals found.</p>
       ) : (
-        meals.map((meal) => (
-          <div key={meal.id} style={{ marginBottom: "1rem" }}>
-            <p>
-              <strong>{meal.title}</strong>
-            </p>
-            <p>{meal.description}</p>
-            <p>Price: {meal.price}</p>
-          </div>
-        ))
+        <div className={styles.grid}>
+          {meals.map((meal) => (
+            <Meal
+              title={meal.title}
+              description={meal.description}
+              image={meal.image}
+              key={meal.id}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
