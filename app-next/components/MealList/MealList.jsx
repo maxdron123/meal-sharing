@@ -1,9 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "./MealList.module.css";
-import Meal from "./Meal";
+import MealCard from "./MealCard";
 
-export default function MealsList() {
+function getRandomMeals(meals, count) {
+  const shuffled = [...meals].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+export default function MealsList({ full = true }) {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,24 +22,54 @@ export default function MealsList() {
   }, []);
 
   if (loading) return <p>Loading meals...</p>;
-
-  return (
-    <div className={styles.container}>
-      <h2 className={styles.heading}>Meals</h2>
-      {meals.length === 0 ? (
-        <p>No meals found.</p>
-      ) : (
-        <div className={styles.grid}>
-          {meals.map((meal) => (
-            <Meal
-              title={meal.title}
-              description={meal.description}
-              image={meal.image}
-              key={meal.id}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  if (!full) {
+    const randomMeals = getRandomMeals(meals, 5);
+    return (
+      <div className={styles.containerAlt}>
+        <h2 className={styles.heading}>Meals</h2>
+        {randomMeals.length === 0 ? (
+          <p>No meals found.</p>
+        ) : (
+          <div className={styles.gridAlt}>
+            {randomMeals.map((meal) => (
+              <MealCard
+                id={meal.id}
+                title={meal.title}
+                description={meal.description}
+                location={meal.location}
+                price={meal.price}
+                image={meal.image}
+                key={meal.id}
+                single={false}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  } else if (full) {
+    return (
+      <div className={styles.container}>
+        <h2 className={styles.heading}>Meals</h2>
+        {meals.length === 0 ? (
+          <p>No meals found.</p>
+        ) : (
+          <div className={styles.grid}>
+            {meals.map((meal) => (
+              <MealCard
+                id={meal.id}
+                title={meal.title}
+                description={meal.description}
+                location={meal.location}
+                price={meal.price}
+                image={meal.image}
+                key={meal.id}
+                single={false}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 }
