@@ -1,0 +1,21 @@
+.footer {
+  background: rgba(119, 114, 114, 0.9);
+  padding: 24px 0;
+  text-align: center;
+  margin: 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+.links {
+  margin-top: 8px;
+}
+
+.link {
+  margin: 0 12px;
+  color: #d0d7df;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
