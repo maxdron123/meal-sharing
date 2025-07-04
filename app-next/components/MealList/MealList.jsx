@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./MealList.module.css";
 import MealCard from "./MealCard";
+import api from "@/utils/api";
 
 function getRandomMeals(meals, count) {
   const shuffled = [...meals].sort(() => 0.5 - Math.random());
@@ -13,7 +14,7 @@ export default function MealsList({ full = true }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/meals")
+    fetch(api("/meals"))
       .then((res) => res.json())
       .then((data) => {
         setMeals(data);

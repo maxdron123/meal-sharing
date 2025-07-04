@@ -1,4 +1,5 @@
 import styles from "./MealCard.module.css";
+import api from "@/utils/api";
 
 export default function ReviewForm({ mealId, onSuccess }) {
   return (
@@ -13,7 +14,7 @@ export default function ReviewForm({ mealId, onSuccess }) {
         const rating = Number(form.rating.value);
 
         try {
-          const res = await fetch("/api/reviews", {
+          const res = await fetch(api("/reviews"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

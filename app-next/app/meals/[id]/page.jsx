@@ -1,13 +1,10 @@
-'use client";';
+"use client";
 import styles from "./page.module.css";
-import MealCard from "../../../components/MealList/MealCard";
+import MealCard from "@/components/MealList/MealCard";
+import api from "@/utils/api";
 
 async function getMeal(id) {
-  const res = await fetch(
-    `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
-    }/api/meals/${id}`
-  );
+  const res = await fetch(api(`/meals/${id}`));
   if (!res.ok) return null;
   return res.json();
 }

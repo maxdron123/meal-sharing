@@ -1,4 +1,5 @@
 import styles from "./MealCard.module.css";
+import api from "@/utils/api";
 
 export default function ReservationForm({ mealId, onSuccess }) {
   return (
@@ -14,7 +15,7 @@ export default function ReservationForm({ mealId, onSuccess }) {
         const guests = form.guests.value;
 
         try {
-          const res = await fetch("/api/reservations", {
+          const res = await fetch(api("/reservations"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
