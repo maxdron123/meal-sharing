@@ -37,35 +37,34 @@ export default function MealCard({
         </div>
       </div>
     );
-  } else if (single) {
-    return (
-      <div className={styles.singleCard}>
-        <img className={styles.img} src={image} alt={title} />
-        <div className={styles.content}>
-          <h3 className={styles.title}>{title}</h3>
-          <p className={styles.description}>{description}</p>
-        </div>
-        <div className={styles.info}>
-          <span className={styles.location}>{location}</span>
-          <span className={styles.price}>€{price}</span>
-        </div>
-        <div className={styles.actions}>
-          <button
-            className={styles.button}
-            onClick={() => setShowReservation((prev) => !prev)}
-          >
-            {showReservation ? "Close Reservation" : "Reserve"}
-          </button>
-          <button
-            className={styles.button}
-            onClick={() => setShowReview((prev) => !prev)}
-          >
-            {showReview ? "Close Review" : "Leave Review"}
-          </button>
-        </div>
-        {showReservation && <ReservationForm mealId={id} />}
-        {showReview && <ReviewForm mealId={id} />}
-      </div>
-    );
   }
+  return (
+    <div className={styles.singleCard}>
+      <img className={styles.img} src={image} alt={title} />
+      <div className={styles.content}>
+        <h3 className={styles.title}>{title}</h3>
+        <p className={styles.description}>{description}</p>
+      </div>
+      <div className={styles.info}>
+        <span className={styles.location}>{location}</span>
+        <span className={styles.price}>€{price}</span>
+      </div>
+      <div className={styles.actions}>
+        <button
+          className={styles.button}
+          onClick={() => setShowReservation((prev) => !prev)}
+        >
+          {showReservation ? "Close Reservation" : "Reserve"}
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => setShowReview((prev) => !prev)}
+        >
+          {showReview ? "Close Review" : "Leave Review"}
+        </button>
+      </div>
+      {showReservation && <ReservationForm mealId={id} />}
+      {showReview && <ReviewForm mealId={id} />}
+    </div>
+  );
 }
