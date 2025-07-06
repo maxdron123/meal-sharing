@@ -16,3 +16,17 @@
   font-size: 2rem;
   font-weight: 600;
 }
+
+.containerAlt {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px 12px;
+}
+
+.gridAlt {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  justify-content: center;
+  justify-items: center;
+}
