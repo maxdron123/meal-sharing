@@ -176,3 +176,57 @@
   border: 1px solid #ccc;
   font-size: 1rem;
 }
+
+.availability {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.spotsLeft {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.spotsGood {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  color: #1b5e20;
+  border: 1px solid #4caf50;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+}
+
+.spotsLow {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #e65100;
+  border: 1px solid #ff9800;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
+}
+
+.spotsEmpty {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #b71c1c;
+  border: 1px solid #f44336;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
+}
+
+.spotsLeft:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.buttonDisabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.buttonDisabled:hover {
+  background: #ccc !important;
+  transform: none !important;
+}
