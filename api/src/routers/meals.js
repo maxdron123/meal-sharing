@@ -18,7 +18,23 @@ mealsRouter.get("/", async (req, res) => {
     sortDir,
   } = req.query;
   try {
-    let query = knex("meals").select("*").orderBy("id");
+    let query = knex("meals")
+      .select(
+        "meals.*",
+        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw(
+          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+        )
+      )
+      .leftJoin(
+        knex("reservations")
+          .select("meal_id")
+          .count("* as total_reservations")
+          .groupBy("meal_id")
+          .as("r"),
+        "meals.id",
+        "r.meal_id"
+      );
     if (maxPrice !== undefined) {
       if (isNaN(Number(maxPrice))) {
         return res.status(400).json({ error: "maxPrice must be a number" });
@@ -35,16 +51,6 @@ mealsRouter.get("/", async (req, res) => {
           error: "availableReservations must be 'true' or 'false'",
         });
       }
-
-      query = query.leftJoin(
-        knex("reservations")
-          .select("meal_id")
-          .count("* as total_reservations")
-          .groupBy("meal_id")
-          .as("r"),
-        "meals.id",
-        "r.meal_id"
-      );
 
       if (availableReservations === "true") {
         query = query.whereRaw(
@@ -99,6 +105,9 @@ mealsRouter.get("/", async (req, res) => {
         return res.status(400).json({ error: "Invalid sortDir" });
       }
       query = query.orderBy(sortKey, direction);
+    } else {
+      // Default ordering by ID if no sortKey is provided
+      query = query.orderBy("id");
     }
     const meals = await query;
     res.json(meals);
@@ -139,7 +148,26 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
 mealsRouter.get("/:id", async (req, res) => {
   try {
     const mealId = req.params.id;
-    const meal = await knex("meals").where({ id: mealId }).first();
+    const meal = await knex("meals")
+      .select(
+        "meals.*",
+        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw(
+          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+        )
+      )
+      .leftJoin(
+        knex("reservations")
+          .select("meal_id")
+          .count("* as total_reservations")
+          .groupBy("meal_id")
+          .as("r"),
+        "meals.id",
+        "r.meal_id"
+      )
+      .where("meals.id", mealId)
+      .first();
+
     if (!meal) {
       return res.status(404).json({ error: "Meal not found" });
     }

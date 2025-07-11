@@ -12,6 +12,8 @@ export default function MealCard({
   image,
   location,
   price,
+  availableSpots,
+  maxReservations,
   single,
 }) {
   const [showReservation, setShowReservation] = useState(false);
@@ -28,6 +30,21 @@ export default function MealCard({
         <div className={styles.info}>
           <span className={styles.location}>{location}</span>
           <span className={styles.price}>€{price}</span>
+        </div>
+        <div className={styles.availability}>
+          <span
+            className={`${styles.spotsLeft} ${
+              availableSpots === 0
+                ? styles.spotsEmpty
+                : availableSpots <= 3
+                ? styles.spotsLow
+                : styles.spotsGood
+            }`}
+          >
+            {availableSpots > 0
+              ? `${availableSpots} spots left`
+              : "Fully booked"}
+          </span>
         </div>
         <div className={styles.actions}>
           <button className={styles.button}>Share</button>
@@ -49,12 +66,32 @@ export default function MealCard({
         <span className={styles.location}>{location}</span>
         <span className={styles.price}>€{price}</span>
       </div>
+      <div className={styles.availability}>
+        <span
+          className={`${styles.spotsLeft} ${
+            availableSpots === 0
+              ? styles.spotsEmpty
+              : availableSpots <= 3
+              ? styles.spotsLow
+              : styles.spotsGood
+          }`}
+        >
+          {availableSpots > 0 ? `${availableSpots} spots left` : "Fully booked"}
+        </span>
+      </div>
       <div className={styles.actions}>
         <button
-          className={styles.button}
+          className={`${styles.button} ${
+            availableSpots === 0 ? styles.buttonDisabled : ""
+          }`}
           onClick={() => setShowReservation((prev) => !prev)}
+          disabled={availableSpots === 0}
         >
-          {showReservation ? "Close Reservation" : "Reserve"}
+          {availableSpots === 0
+            ? "Fully Booked"
+            : showReservation
+            ? "Close Reservation"
+            : "Reserve"}
         </button>
         <button
           className={styles.button}
