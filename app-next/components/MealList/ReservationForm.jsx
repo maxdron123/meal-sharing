@@ -1,11 +1,10 @@
-import styles from "./MealCard.module.css";
+import styles from "./Forms.module.css";
 import api from "@/utils/api";
 
 export default function ReservationForm({ mealId, onSuccess }) {
   return (
     <form
-      className={styles.reservationForm}
-      style={{ marginTop: 24 }}
+      className={styles.form}
       onSubmit={async (e) => {
         e.preventDefault();
         const form = e.target;
@@ -40,38 +39,62 @@ export default function ReservationForm({ mealId, onSuccess }) {
         }
       }}
     >
-      <div>
-        <label>
-          Name:
-          <input type="text" name="name" required />
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          <span className={styles.labelText}>Full Name</span>
+          <input
+            type="text"
+            name="name"
+            required
+            className={styles.input}
+            placeholder="Enter your full name"
+          />
         </label>
       </div>
-      <div>
-        <label>
-          Phone Number:
-          <input type="tel" name="phone" required />
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          <span className={styles.labelText}>Phone Number</span>
+          <input
+            type="tel"
+            name="phone"
+            required
+            className={styles.input}
+            placeholder="Enter your phone number"
+          />
         </label>
       </div>
-      <div>
-        <label>
-          Number of Guests:
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          <span className={styles.labelText}>Email Address</span>
+          <input
+            type="email"
+            name="email"
+            required
+            className={styles.input}
+            placeholder="Enter your email"
+          />
+        </label>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>
+          <span className={styles.labelText}>Number of Guests</span>
           <input
             type="number"
             name="guests"
             min="1"
             defaultValue="1"
             required
+            className={styles.input}
           />
         </label>
       </div>
-      <div>
-        <label>
-          Email:
-          <input type="email" name="email" required />
-        </label>
-      </div>
-      <button type="submit" className={styles.button}>
-        Submit Reservation
+
+      <button type="submit" className={styles.submitButton}>
+        <span className={styles.buttonIcon}>🍽️</span>
+        Make Reservation
       </button>
     </form>
   );

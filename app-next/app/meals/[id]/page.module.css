@@ -4,7 +4,121 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 400px 400px;
+  gap: 32px;
+  align-items: start;
+  justify-items: center;
+}
+
+.mealCardWrapper {
+  grid-column: 2;
+  width: 100%;
+}
+
+.formsWrapper {
+  grid-column: 3;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.formCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.formTitle {
+  margin: 0 0 20px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0d47a1;
+  text-align: center;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 12px;
+}
+
+.loading {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.2rem;
+  color: #666;
+  background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+  color: white;
+}
+
+.notFound {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #fff;
+  background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 1fr 350px;
+    gap: 24px;
+  }
+
+  .mealCardWrapper {
+    grid-column: 1;
+  }
+
+  .formsWrapper {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 500px;
+  }
+
+  .mealCardWrapper {
+    grid-column: 1;
+  }
+
+  .formsWrapper {
+    grid-column: 1;
+  }
+
+  .background {
+    padding: 20px 16px;
+  }
+
+  .formCard {
+    padding: 20px;
+  }
 }

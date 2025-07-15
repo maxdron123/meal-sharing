@@ -15,9 +15,35 @@ export default function MealCard({
   availableSpots,
   maxReservations,
   single,
+  onReservationToggle,
+  onReviewToggle,
+  showReservation,
+  showReview,
 }) {
-  const [showReservation, setShowReservation] = useState(false);
-  const [showReview, setShowReview] = useState(false);
+  const [internalShowReservation, setInternalShowReservation] = useState(false);
+  const [internalShowReview, setInternalShowReview] = useState(false);
+
+  // Use internal state for non-single cards, external state for single cards
+  const isShowingReservation = single
+    ? showReservation
+    : internalShowReservation;
+  const isShowingReview = single ? showReview : internalShowReview;
+
+  const handleReservationToggle = () => {
+    if (single && onReservationToggle) {
+      onReservationToggle();
+    } else {
+      setInternalShowReservation(!internalShowReservation);
+    }
+  };
+
+  const handleReviewToggle = () => {
+    if (single && onReviewToggle) {
+      onReviewToggle();
+    } else {
+      setInternalShowReview(!internalShowReview);
+    }
+  };
 
   if (!single) {
     return (
@@ -56,52 +82,55 @@ export default function MealCard({
     );
   }
   return (
-    <div className={styles.singleCard}>
-      <img className={styles.img} src={image} alt={title} />
-      <div className={styles.content}>
-        <h3 className={styles.title}>{title}</h3>
-        <p className={styles.description}>{description}</p>
+    <>
+      <div className={styles.singleCard}>
+        <img className={styles.img} src={image} alt={title} />
+        <div className={styles.content}>
+          <h3 className={styles.title}>{title}</h3>
+          <p className={styles.description}>{description}</p>
+        </div>
+        <div className={styles.info}>
+          <span className={styles.location}>{location}</span>
+          <span className={styles.price}>€{price}</span>
+        </div>
+        <div className={styles.availability}>
+          <span
+            className={`${styles.spotsLeft} ${
+              availableSpots === 0
+                ? styles.spotsEmpty
+                : availableSpots <= 3
+                ? styles.spotsLow
+                : styles.spotsGood
+            }`}
+          >
+            {availableSpots > 0
+              ? `${availableSpots} spots left`
+              : "Fully booked"}
+          </span>
+        </div>
+        <div className={styles.actions}>
+          <button
+            className={`${styles.button} ${
+              availableSpots === 0 ? styles.buttonDisabled : ""
+            }`}
+            onClick={handleReservationToggle}
+            disabled={availableSpots === 0}
+          >
+            {availableSpots === 0
+              ? "Fully Booked"
+              : isShowingReservation
+              ? "Close Reservation"
+              : "Reserve"}
+          </button>
+          <button className={styles.button} onClick={handleReviewToggle}>
+            {isShowingReview ? "Close Review" : "Leave Review"}
+          </button>
+        </div>
       </div>
-      <div className={styles.info}>
-        <span className={styles.location}>{location}</span>
-        <span className={styles.price}>€{price}</span>
-      </div>
-      <div className={styles.availability}>
-        <span
-          className={`${styles.spotsLeft} ${
-            availableSpots === 0
-              ? styles.spotsEmpty
-              : availableSpots <= 3
-              ? styles.spotsLow
-              : styles.spotsGood
-          }`}
-        >
-          {availableSpots > 0 ? `${availableSpots} spots left` : "Fully booked"}
-        </span>
-      </div>
-      <div className={styles.actions}>
-        <button
-          className={`${styles.button} ${
-            availableSpots === 0 ? styles.buttonDisabled : ""
-          }`}
-          onClick={() => setShowReservation((prev) => !prev)}
-          disabled={availableSpots === 0}
-        >
-          {availableSpots === 0
-            ? "Fully Booked"
-            : showReservation
-            ? "Close Reservation"
-            : "Reserve"}
-        </button>
-        <button
-          className={styles.button}
-          onClick={() => setShowReview((prev) => !prev)}
-        >
-          {showReview ? "Close Review" : "Leave Review"}
-        </button>
-      </div>
-      {showReservation && <ReservationForm mealId={id} />}
-      {showReview && <ReviewForm mealId={id} />}
-    </div>
+
+      {/* For non-single cards, show forms below */}
+      {!single && internalShowReservation && <ReservationForm mealId={id} />}
+      {!single && internalShowReview && <ReviewForm mealId={id} />}
+    </>
   );
 }
