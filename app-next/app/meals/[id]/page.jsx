@@ -25,6 +25,8 @@ export default async function MealDetailPage({ params }) {
         image={meal.image}
         location={meal.location}
         price={meal.price}
+        availableSpots={meal.available_spots}
+        maxReservations={meal.max_reservations}
         single={true}
       />
     </div>
