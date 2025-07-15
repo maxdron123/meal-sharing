@@ -9,23 +9,35 @@ export default function Navbar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
-        <Link href="/">🍽️ Meal Sharing</Link>
+        <Link href="/">
+          <span className={styles.logoIcon}>🍽️</span>
+          <span className={styles.logoText}>Meal Sharing</span>
+        </Link>
       </div>
-      <h1>Welcome to Meal Sharing!</h1>
 
       <button
         className={styles.menuButton}
         onClick={() => setMenuOpen((open) => !open)}
         aria-label="Toggle menu"
       >
-        <span className={styles.menuIcon}>&#9776;</span>
+        <div
+          className={`${styles.hamburger} ${
+            menuOpen ? styles.hamburgerOpen : ""
+          }`}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </button>
+
       <div className={`${styles.links} ${menuOpen ? styles.show : ""}`}>
         <Link
           href="/"
           className={styles.link}
           onClick={() => setMenuOpen(false)}
         >
+          <span className={styles.linkIcon}>🏠</span>
           Home
         </Link>
         <Link
@@ -33,6 +45,7 @@ export default function Navbar() {
           className={styles.link}
           onClick={() => setMenuOpen(false)}
         >
+          <span className={styles.linkIcon}>🍽️</span>
           Meals
         </Link>
       </div>
