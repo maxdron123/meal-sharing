@@ -17,6 +17,7 @@ export const Reservation = z.strictObject({
     .max(15, "Phone number must be at most 15 characters long"),
   contact_name: z.string().min(1, "Contact name is required"),
   contact_email: z.email("Invalid email format").optional(),
+  user_id: z.number().int().positive().optional(),
 });
 
 export const ReservationUpdate = Reservation.partial();

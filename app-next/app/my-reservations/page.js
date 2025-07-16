@@ -20,48 +20,82 @@ export default function MyReservationsPage() {
 
   useEffect(() => {
     if (user) {
-      // TODO: Fetch user's reservations from backend
-      // Simulating data for now
-      setTimeout(() => {
-        setReservations([
-          {
-            id: 1,
-            mealTitle: "Italian Pasta Night",
-            mealImage: "/api/placeholder/300/200",
-            date: "2025-07-20",
-            time: "19:00",
-            guests: 2,
-            status: "confirmed",
-            location: "Downtown Kitchen",
-            price: 25.99,
-          },
-          {
-            id: 2,
-            mealTitle: "Sushi Workshop",
-            mealImage: "/api/placeholder/300/200",
-            date: "2025-07-25",
-            time: "18:30",
-            guests: 1,
-            status: "pending",
-            location: "Zen Cooking Studio",
-            price: 45.0,
-          },
-          {
-            id: 3,
-            mealTitle: "BBQ & Grill Master Class",
-            mealImage: "/api/placeholder/300/200",
-            date: "2025-07-15",
-            time: "17:00",
-            guests: 4,
-            status: "completed",
-            location: "Backyard Bistro",
-            price: 35.5,
-          },
-        ]);
-        setLoadingReservations(false);
-      }, 1000);
+      fetchUserReservations();
     }
   }, [user]);
+
+  const fetchUserReservations = async () => {
+    try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+
+      let response = await fetch(
+        `${backendUrl}/api/reservations/user/${user.id}`
+      );
+
+      if (!response.ok) {
+        response = await fetch(`${backendUrl}/api/reservations`);
+
+        if (response.ok) {
+          const allReservations = await response.json();
+          const userReservations = allReservations.filter(
+            (reservation) => reservation.user_id === user.id
+          );
+          setReservations(userReservations);
+        } else {
+          setReservations([]);
+        }
+      } else {
+        const data = await response.json();
+        setReservations(data);
+      }
+
+      setLoadingReservations(false);
+    } catch (error) {
+      setReservations([]);
+      setLoadingReservations(false);
+    }
+  };
+
+  const handleCancelReservation = async (reservationId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to cancel this reservation? This action cannot be undone."
+      )
+    ) {
+      try {
+        const backendUrl =
+          process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+        const response = await fetch(
+          `${backendUrl}/api/reservations/${reservationId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          setReservations((prevReservations) =>
+            prevReservations.filter(
+              (reservation) => reservation.id !== reservationId
+            )
+          );
+          alert("Reservation cancelled successfully!");
+        } else {
+          alert("Failed to cancel reservation. Please try again.");
+        }
+      } catch (error) {
+        alert("Failed to cancel reservation. Please try again.");
+      }
+    }
+  };
+
+  const handleViewMealDetails = (mealId) => {
+    if (mealId) {
+      router.push(`/meals/${mealId}`);
+    } else {
+      alert("Meal details not available");
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -163,8 +197,12 @@ export default function MyReservationsPage() {
             <div key={reservation.id} className={styles.reservationCard}>
               <div className={styles.mealImage}>
                 <img
-                  src={reservation.mealImage}
-                  alt={reservation.mealTitle}
+                  src={
+                    reservation.meal_image ||
+                    reservation.image ||
+                    "/placeholder-meal.jpg"
+                  }
+                  alt={reservation.meal_title || reservation.title || "Meal"}
                   onError={(e) => {
                     e.target.src = `data:image/svg+xml;base64,${btoa(`
                         <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -178,72 +216,63 @@ export default function MyReservationsPage() {
 
               <div className={styles.reservationInfo}>
                 <div className={styles.reservationHeader}>
-                  <h3>{reservation.mealTitle}</h3>
-                  <div
-                    className={styles.status}
-                    style={{ color: getStatusColor(reservation.status) }}
-                  >
-                    {getStatusIcon(reservation.status)}{" "}
-                    {reservation.status.charAt(0).toUpperCase() +
-                      reservation.status.slice(1)}
+                  <h3>
+                    {reservation.meal_title || reservation.title || "Meal"}
+                  </h3>
+                  <div className={styles.reservationId}>
+                    Reservation #{reservation.id}
                   </div>
                 </div>
 
                 <div className={styles.reservationDetails}>
                   <div className={styles.detailItem}>
                     <span className={styles.icon}>📅</span>
-                    <span>{formatDate(reservation.date)}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.icon}>🕐</span>
-                    <span>{reservation.time}</span>
+                    <span>{formatDate(reservation.created_date)}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <span className={styles.icon}>👥</span>
                     <span>
-                      {reservation.guests}{" "}
-                      {reservation.guests === 1 ? "guest" : "guests"}
+                      {reservation.number_of_guests}{" "}
+                      {reservation.number_of_guests === 1 ? "guest" : "guests"}
                     </span>
                   </div>
                   <div className={styles.detailItem}>
-                    <span className={styles.icon}>📍</span>
-                    <span>{reservation.location}</span>
+                    <span className={styles.icon}>👤</span>
+                    <span>{reservation.contact_name}</span>
                   </div>
                   <div className={styles.detailItem}>
-                    <span className={styles.icon}>💰</span>
-                    <span>${reservation.price.toFixed(2)}</span>
+                    <span className={styles.icon}>📧</span>
+                    <span>{reservation.contact_email}</span>
                   </div>
+                  {reservation.meal_location && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.icon}>📍</span>
+                      <span>{reservation.meal_location}</span>
+                    </div>
+                  )}
+                  {reservation.meal_price && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.icon}>💰</span>
+                      <span>
+                        ${Number(reservation.meal_price).toFixed(2)} per person
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.reservationActions}>
-                  {reservation.status === "confirmed" && (
-                    <>
-                      <button className={styles.actionBtn}>View Details</button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.cancelBtn}`}
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  )}
-                  {reservation.status === "pending" && (
-                    <>
-                      <button className={styles.actionBtn}>View Details</button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.cancelBtn}`}
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  )}
-                  {reservation.status === "completed" && (
-                    <>
-                      <button className={styles.actionBtn}>View Details</button>
-                      <Link href="/my-reviews" className={styles.actionBtn}>
-                        Write Review
-                      </Link>
-                    </>
-                  )}
+                  <button
+                    className={styles.actionBtn}
+                    onClick={() => handleViewMealDetails(reservation.meal_id)}
+                  >
+                    View Meal Details
+                  </button>
+                  <button
+                    className={`${styles.actionBtn} ${styles.cancelBtn}`}
+                    onClick={() => handleCancelReservation(reservation.id)}
+                  >
+                    Cancel Reservation
+                  </button>
                 </div>
               </div>
             </div>

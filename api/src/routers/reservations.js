@@ -15,6 +15,38 @@ reservationsRouter.get("/", async (req, res) => {
   }
 });
 
+reservationsRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const reservations = await knex("reservations")
+      .select(
+        "reservations.id as id",
+        "reservations.number_of_guests",
+        "reservations.meal_id",
+        "reservations.created_date",
+        "reservations.contact_phonenumber",
+        "reservations.contact_name",
+        "reservations.contact_email",
+        "reservations.user_id",
+        "meals.title as meal_title",
+        "meals.description as meal_description",
+        "meals.location as meal_location",
+        "meals.when as meal_when",
+        "meals.max_reservations as meal_max_reservations",
+        "meals.price as meal_price",
+        "meals.created_by as meal_created_by",
+        "meals.image as meal_image"
+      )
+      .leftJoin("meals", "reservations.meal_id", "meals.id")
+      .where("reservations.user_id", userId)
+      .orderBy("reservations.id", "desc");
+
+    res.json(reservations);
+  } catch {
+    res.status(500).json({ error: "Failed to fetch user reservations" });
+  }
+});
+
 reservationsRouter.post("/", validate(validations.create), async (req, res) => {
   const {
     number_of_guests,
@@ -23,16 +55,18 @@ reservationsRouter.post("/", validate(validations.create), async (req, res) => {
     contact_phonenumber,
     contact_name,
     contact_email,
+    user_id,
   } = req.body;
 
   try {
     const newReservation = {
       number_of_guests,
       meal_id,
-      created_date,
+      created_date: created_date || new Date().toISOString().split("T")[0],
       contact_phonenumber,
       contact_name,
       contact_email,
+      user_id,
     };
     const [reservationID] = await knex("reservations")
       .insert(newReservation)
@@ -43,7 +77,8 @@ reservationsRouter.post("/", validate(validations.create), async (req, res) => {
     res
       .status(201)
       .send(`Created reservation for ${createdReservation.contact_name}!`);
-  } catch {
+  } catch (error) {
+    console.error("Error creating reservation:", error);
     res.status(500).json({ error: "Failed to create reservation" });
   }
 });
@@ -103,21 +138,32 @@ reservationsRouter.put(
   }
 );
 
-reservationsRouter.delete(
-  "/:id",
-  validate(validations.delete),
-  async (req, res) => {
-    try {
-      const reservationID = req.params.id;
-      const deletedRows = await knex("reservations")
-        .where({ id: reservationID })
-        .del();
-      if (deletedRows === 0) {
-        return res.status(404).json({ error: "Reservation not found" });
-      }
-      res.status(200).send({ success: "Reservation deleted successfully" });
-    } catch {
-      res.status(500).json({ error: "Failed to delete reservation" });
+reservationsRouter.delete("/:id", async (req, res) => {
+  try {
+    const reservationID = req.params.id;
+
+    if (isNaN(reservationID) || !Number.isInteger(Number(reservationID))) {
+      return res.status(400).json({ error: "Invalid reservation ID format" });
     }
+
+    const existingReservation = await knex("reservations")
+      .where({ id: reservationID })
+      .first();
+
+    if (!existingReservation) {
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
+    const deletedRows = await knex("reservations")
+      .where({ id: reservationID })
+      .del();
+
+    if (deletedRows === 0) {
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
+    res.status(200).json({ success: "Reservation deleted successfully" });
+  } catch {
+    res.status(500).json({ error: "Failed to delete reservation" });
   }
-);
+});

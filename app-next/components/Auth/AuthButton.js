@@ -104,6 +104,16 @@ export default function AuthButton() {
                   My Profile
                 </a>
 
+                <a href="/my-meals" className="menu-item">
+                  <svg width="16" height="16" viewBox="0 0 16 16">
+                    <path
+                      fill="currentColor"
+                      d="M2 3a1 1 0 011-1h10a1 1 0 011 1v2a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm0 5a1 1 0 011-1h10a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1V8z"
+                    />
+                  </svg>
+                  My Meals
+                </a>
+
                 <a href="/my-reservations" className="menu-item">
                   <svg width="16" height="16" viewBox="0 0 16 16">
                     <path

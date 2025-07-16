@@ -16,7 +16,8 @@ reviewsRouter.get("/", async (req, res) => {
 });
 
 reviewsRouter.post("/", validate(validations.create), async (req, res) => {
-  const { id, title, description, meal_id, stars, created_date } = req.body;
+  const { id, title, description, meal_id, stars, created_date, user_id } =
+    req.body;
 
   try {
     const newReview = {
@@ -25,12 +26,33 @@ reviewsRouter.post("/", validate(validations.create), async (req, res) => {
       description,
       meal_id,
       stars,
-      created_date,
+      created_date: created_date || new Date().toISOString().split("T")[0],
+      user_id,
     };
     await knex("reviews").insert(newReview);
     res.status(201).end();
-  } catch {
+  } catch (error) {
+    console.error("Error creating review:", error);
     res.status(500).json({ error: "Failed to create review" });
+  }
+});
+
+reviewsRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const reviews = await knex("reviews")
+      .select(
+        "reviews.*",
+        "meals.title as meal_title",
+        "meals.image as meal_image"
+      )
+      .leftJoin("meals", "reviews.meal_id", "meals.id")
+      .where("reviews.user_id", userId)
+      .orderBy("reviews.id", "desc");
+    res.json(reviews);
+  } catch (error) {
+    console.error("Error fetching user reviews:", error);
+    res.status(500).json({ error: "Failed to fetch user reviews" });
   }
 });
 

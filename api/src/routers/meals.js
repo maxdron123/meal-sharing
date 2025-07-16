@@ -147,23 +147,81 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
     max_reservations,
     price,
     created_date,
+    image,
+    created_by,
   } = req.body;
 
   try {
+    // Convert ISO datetime to MySQL datetime format
+    const mysqlDatetime = new Date(when)
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+
     const newMeal = {
       title,
       description,
       location,
-      when,
+      when: mysqlDatetime,
       max_reservations,
       price,
-      created_date,
+      created_date: created_date || new Date().toISOString().split("T")[0], // Default to today if not provided
+      image,
+      created_by, // Add user ID for meal ownership
     };
     const [mealId] = await knex("meals").insert(newMeal);
     const createdMeal = await knex("meals").where({ id: mealId }).first();
-    res.status(201).send(`Created meal ${createdMeal.title}!`);
-  } catch {
+    res
+      .status(201)
+      .json({
+        message: `Created meal ${createdMeal.title}!`,
+        meal: createdMeal,
+      });
+  } catch (error) {
+    console.error("Error creating meal:", error);
     res.status(500).json({ error: "Failed to create meal" });
+  }
+});
+
+mealsRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const meals = await knex("meals")
+      .select(
+        "meals.*",
+        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw(
+          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+        ),
+        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
+        knex.raw("IFNULL(rv.review_count, 0) as review_count")
+      )
+      .leftJoin(
+        knex("reservations")
+          .select("meal_id")
+          .count("* as total_reservations")
+          .groupBy("meal_id")
+          .as("r"),
+        "meals.id",
+        "r.meal_id"
+      )
+      .leftJoin(
+        knex("reviews")
+          .select("meal_id")
+          .avg("stars as average_rating")
+          .count("* as review_count")
+          .groupBy("meal_id")
+          .as("rv"),
+        "meals.id",
+        "rv.meal_id"
+      )
+      .where("meals.created_by", userId)
+      .orderBy("meals.id", "desc");
+
+    res.json(meals);
+  } catch (error) {
+    console.error("Error fetching user meals:", error);
+    res.status(500).json({ error: "Failed to fetch user meals" });
   }
 });
 

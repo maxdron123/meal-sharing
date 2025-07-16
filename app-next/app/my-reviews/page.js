@@ -26,48 +26,49 @@ export default function MyReviewsPage() {
 
   useEffect(() => {
     if (user) {
-      // TODO: Fetch user's reviews from backend
-      // Simulating data for now
-      setTimeout(() => {
-        setReviews([
-          {
-            id: 1,
-            mealTitle: "Italian Pasta Night",
-            mealImage: "/api/placeholder/300/200",
-            title: "Amazing authentic experience!",
-            description:
-              "The pasta was perfectly cooked and the atmosphere was wonderful. The chef was very knowledgeable about Italian cuisine and shared great stories about the recipes.",
-            stars: 5,
-            dateCreated: "2025-07-16",
-            mealDate: "2025-07-15",
-          },
-          {
-            id: 2,
-            mealTitle: "Sushi Workshop",
-            mealImage: "/api/placeholder/300/200",
-            title: "Great learning experience",
-            description:
-              "Learned so much about sushi making techniques. The instructor was patient and the ingredients were fresh. Would definitely recommend for beginners.",
-            stars: 4,
-            dateCreated: "2025-07-10",
-            mealDate: "2025-07-08",
-          },
-          {
-            id: 3,
-            mealTitle: "BBQ & Grill Master Class",
-            mealImage: "/api/placeholder/300/200",
-            title: "Fun but could be better",
-            description:
-              "The BBQ techniques were interesting but the venue was a bit crowded. Food was good overall but service could be improved.",
-            stars: 3,
-            dateCreated: "2025-07-05",
-            mealDate: "2025-07-03",
-          },
-        ]);
-        setLoadingReviews(false);
-      }, 1000);
+      fetchUserReviews();
     }
   }, [user]);
+
+  const fetchUserReviews = async () => {
+    try {
+      // Get user's reviews from backend
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+
+      // Try to fetch user-specific reviews
+      let response = await fetch(`${backendUrl}/api/reviews/user/${user.id}`);
+
+      // If that fails, fallback to all reviews and filter client-side
+      if (!response.ok) {
+        console.log(
+          "User-specific reviews endpoint failed, trying all reviews..."
+        );
+        response = await fetch(`${backendUrl}/api/reviews`);
+
+        if (response.ok) {
+          const allReviews = await response.json();
+          // Filter reviews by user ID on the client side
+          const userReviews = allReviews.filter(
+            (review) => review.user_id === user.id
+          );
+          setReviews(userReviews);
+        } else {
+          console.error("Failed to fetch reviews from backend");
+          setReviews([]);
+        }
+      } else {
+        const data = await response.json();
+        setReviews(data);
+      }
+
+      setLoadingReviews(false);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setReviews([]);
+      setLoadingReviews(false);
+    }
+  };
 
   const handleEditClick = (review) => {
     setEditingReview(review.id);
@@ -204,8 +205,8 @@ export default function MyReviewsPage() {
             <div key={review.id} className={styles.reviewCard}>
               <div className={styles.mealImage}>
                 <img
-                  src={review.mealImage}
-                  alt={review.mealTitle}
+                  src={review.meal?.image || review.image}
+                  alt={review.meal?.title || review.title}
                   onError={(e) => {
                     e.target.src = `data:image/svg+xml;base64,${btoa(`
                       <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -219,14 +220,12 @@ export default function MyReviewsPage() {
 
               <div className={styles.reviewContent}>
                 <div className={styles.reviewHeader}>
-                  <h3>{review.mealTitle}</h3>
+                  <h3>{review.meal?.title || "Meal"}</h3>
                   <div className={styles.reviewMeta}>
-                    <span className={styles.mealDate}>
-                      Meal: {formatDate(review.mealDate)}
-                    </span>
                     <span className={styles.reviewDate}>
-                      Reviewed: {formatDate(review.dateCreated)}
+                      Reviewed: {formatDate(review.created_date)}
                     </span>
+                    <span className={styles.reviewId}>Review #{review.id}</span>
                   </div>
                 </div>
 

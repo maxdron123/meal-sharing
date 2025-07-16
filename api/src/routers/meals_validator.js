@@ -15,6 +15,8 @@ export const Meal = z.strictObject({
     .min(1, "Price must be at least 1")
     .max(200, "Price cannot exceed 200"),
   created_date: z.string().optional(),
+  image: z.string().nullable().optional(),
+  created_by: z.number().optional(),
 });
 
 export const MealUpdate = Meal.partial();

@@ -13,6 +13,7 @@ export const Review = z.strictObject({
     .min(1, "Stars must be at least 1")
     .max(5, "Stars cannot exceed 5"),
   created_date: z.string().optional(),
+  user_id: z.number().int().positive().optional(),
 });
 
 export const ReviewUpdate = Review.partial();
