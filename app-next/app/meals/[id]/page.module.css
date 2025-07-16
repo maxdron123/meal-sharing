@@ -122,3 +122,48 @@
     padding: 20px;
   }
 }
+
+.reviewsSection {
+  grid-column: 1 / -1;
+  margin-top: 3rem;
+  width: 100%;
+}
+
+.reviewsSection h2 {
+  color: #0d47a1;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reviewsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.noReviews {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin-top: 2rem;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 900px) {
+  .reviewsList {
+    grid-template-columns: 1fr;
+  }
+
+  .reviewsSection h2 {
+    font-size: 1.6rem;
+  }
+}

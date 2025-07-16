@@ -107,6 +107,8 @@ export default function MealsList({ full = true }) {
                 image={meal.image}
                 availableSpots={meal.available_spots}
                 maxReservations={meal.max_reservations}
+                averageRating={meal.average_rating}
+                reviewCount={meal.review_count}
                 key={meal.id}
                 single={false}
               />
@@ -161,6 +163,7 @@ export default function MealsList({ full = true }) {
               <option value="when">Date</option>
               <option value="price">Price</option>
               <option value="max_reservations">Max Reservations</option>
+              <option value="average_rating">Rating</option>
             </select>
           </div>
 
@@ -208,6 +211,8 @@ export default function MealsList({ full = true }) {
                   ? "Date"
                   : sortKey === "max_reservations"
                   ? "Max Reservations"
+                  : sortKey === "average_rating"
+                  ? "Rating"
                   : "Price"}{" "}
                 ({sortDir === "asc" ? "Ascending" : "Descending"})
               </>
@@ -233,6 +238,8 @@ export default function MealsList({ full = true }) {
                 image={meal.image}
                 availableSpots={meal.available_spots}
                 maxReservations={meal.max_reservations}
+                averageRating={meal.average_rating}
+                reviewCount={meal.review_count}
                 key={meal.id}
                 single={false}
               />

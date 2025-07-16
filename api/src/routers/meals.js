@@ -24,7 +24,9 @@ mealsRouter.get("/", async (req, res) => {
         knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
         knex.raw(
           "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
-        )
+        ),
+        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
+        knex.raw("IFNULL(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
@@ -34,6 +36,16 @@ mealsRouter.get("/", async (req, res) => {
           .as("r"),
         "meals.id",
         "r.meal_id"
+      )
+      .leftJoin(
+        knex("reviews")
+          .select("meal_id")
+          .avg("stars as average_rating")
+          .count("* as review_count")
+          .groupBy("meal_id")
+          .as("rv"),
+        "meals.id",
+        "rv.meal_id"
       );
     if (maxPrice !== undefined) {
       if (isNaN(Number(maxPrice))) {
@@ -95,7 +107,12 @@ mealsRouter.get("/", async (req, res) => {
       if (typeof sortKey !== "string") {
         return res.status(400).json({ error: "sortKey must be a string" });
       }
-      const allowedSortKeys = ["when", "max_reservations", "price"];
+      const allowedSortKeys = [
+        "when",
+        "max_reservations",
+        "price",
+        "average_rating",
+      ];
       const allowedSortDirs = ["asc", "desc"];
       if (!allowedSortKeys.includes(sortKey)) {
         return res.status(400).json({ error: "Invalid sortKey" });
@@ -104,7 +121,12 @@ mealsRouter.get("/", async (req, res) => {
       if (!allowedSortDirs.includes(direction)) {
         return res.status(400).json({ error: "Invalid sortDir" });
       }
-      query = query.orderBy(sortKey, direction);
+
+      if (sortKey === "average_rating") {
+        query = query.orderByRaw(`IFNULL(rv.average_rating, 0) ${direction}`);
+      } else {
+        query = query.orderBy(sortKey, direction);
+      }
     } else {
       // Default ordering by ID if no sortKey is provided
       query = query.orderBy("id");
@@ -154,7 +176,9 @@ mealsRouter.get("/:id", async (req, res) => {
         knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
         knex.raw(
           "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
-        )
+        ),
+        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
+        knex.raw("IFNULL(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
@@ -164,6 +188,16 @@ mealsRouter.get("/:id", async (req, res) => {
           .as("r"),
         "meals.id",
         "r.meal_id"
+      )
+      .leftJoin(
+        knex("reviews")
+          .select("meal_id")
+          .avg("stars as average_rating")
+          .count("* as review_count")
+          .groupBy("meal_id")
+          .as("rv"),
+        "meals.id",
+        "rv.meal_id"
       )
       .where("meals.id", mealId)
       .first();

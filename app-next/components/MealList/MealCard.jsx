@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import ReservationForm from "./ReservationForm";
 import ReviewForm from "./ReviewForm";
+import Rating from "./Rating";
 
 export default function MealCard({
   id,
@@ -19,6 +20,8 @@ export default function MealCard({
   onReviewToggle,
   showReservation,
   showReview,
+  averageRating,
+  reviewCount,
 }) {
   const [internalShowReservation, setInternalShowReservation] = useState(false);
   const [internalShowReview, setInternalShowReview] = useState(false);
@@ -57,6 +60,16 @@ export default function MealCard({
           <span className={styles.location}>{location}</span>
           <span className={styles.price}>€{price}</span>
         </div>
+
+        {/* Compact rating display for list cards */}
+        <div className={styles.compactRating}>
+          <Rating
+            rating={averageRating || 0}
+            reviewCount={reviewCount || 0}
+            showCount={false}
+          />
+        </div>
+
         <div className={styles.availability}>
           <span
             className={`${styles.spotsLeft} ${
@@ -92,6 +105,15 @@ export default function MealCard({
         <div className={styles.info}>
           <span className={styles.location}>{location}</span>
           <span className={styles.price}>€{price}</span>
+        </div>
+
+        {/* Rating display for single card */}
+        <div className={styles.ratingSection}>
+          <Rating
+            rating={averageRating || 0}
+            reviewCount={reviewCount || 0}
+            showCount={true}
+          />
         </div>
         <div className={styles.availability}>
           <span
