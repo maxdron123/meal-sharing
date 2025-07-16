@@ -2,6 +2,7 @@
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 import { useState } from "react";
+import AuthButton from "../Auth/AuthButton";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,6 +49,10 @@ export default function Navbar() {
           <span className={styles.linkIcon}>🍽️</span>
           Meals
         </Link>
+
+        <div className={styles.authSection}>
+          <AuthButton />
+        </div>
       </div>
     </nav>
   );

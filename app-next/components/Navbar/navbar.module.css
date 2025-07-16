@@ -8,6 +8,7 @@
   position: relative;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
+  z-index: 99998;
 }
 
 .logo a {
@@ -44,6 +45,10 @@
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.authSection {
+  margin-left: auto;
 }
 
 .link {
@@ -180,7 +185,7 @@
     width: 200px;
     border-radius: 0 0 12px 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    z-index: 1000;
+    z-index: 99999;
     overflow: hidden;
     animation: slideDown 0.3s ease-out;
   }
@@ -206,6 +211,8 @@
     border-radius: 0;
     justify-content: flex-start;
     transition: all 0.2s ease;
+    color: #ffffff;
+    font-weight: 600;
   }
 
   .link:last-child {

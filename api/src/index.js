@@ -2,11 +2,11 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import knex from "./database_client.js";
 import nestedRouter from "./routers/nested.js";
 import { mealsRouter } from "./routers/meals.js";
 import { reservationsRouter } from "./routers/reservations.js";
 import { reviewsRouter } from "./routers/reviews.js";
+import { usersRouter } from "./routers/users.js";
 
 const app = express();
 app.use(cors());
@@ -17,6 +17,7 @@ const apiRouter = express.Router();
 apiRouter.use("/meals", mealsRouter);
 apiRouter.use("/reservations", reservationsRouter);
 apiRouter.use("/reviews", reviewsRouter);
+apiRouter.use("/users", usersRouter);
 apiRouter.use("/nested", nestedRouter);
 
 // This nested router example can also be replaced with your own sub-router

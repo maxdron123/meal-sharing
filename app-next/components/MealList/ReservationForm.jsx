@@ -1,7 +1,10 @@
 import styles from "./Forms.module.css";
 import api from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ReservationForm({ mealId, onSuccess }) {
+  const { user } = useAuth();
+
   return (
     <form
       className={styles.form}
@@ -19,6 +22,7 @@ export default function ReservationForm({ mealId, onSuccess }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               meal_id: mealId,
+              user_id: user?.id,
               contact_name: name,
               contact_phonenumber: phone,
               contact_email: email,
@@ -48,6 +52,7 @@ export default function ReservationForm({ mealId, onSuccess }) {
             required
             className={styles.input}
             placeholder="Enter your full name"
+            defaultValue={user ? `${user.firstName} ${user.lastName}` : ""}
           />
         </label>
       </div>
@@ -61,6 +66,7 @@ export default function ReservationForm({ mealId, onSuccess }) {
             required
             className={styles.input}
             placeholder="Enter your phone number"
+            defaultValue={user?.phoneNumber || ""}
           />
         </label>
       </div>
@@ -74,6 +80,7 @@ export default function ReservationForm({ mealId, onSuccess }) {
             required
             className={styles.input}
             placeholder="Enter your email"
+            defaultValue={user?.email || ""}
           />
         </label>
       </div>

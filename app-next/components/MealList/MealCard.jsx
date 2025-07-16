@@ -5,6 +5,8 @@ import { useState } from "react";
 import ReservationForm from "./ReservationForm";
 import ReviewForm from "./ReviewForm";
 import Rating from "./Rating";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthModal from "../Auth/AuthModal";
 
 export default function MealCard({
   id,
@@ -25,6 +27,9 @@ export default function MealCard({
 }) {
   const [internalShowReservation, setInternalShowReservation] = useState(false);
   const [internalShowReview, setInternalShowReview] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const { user, isAuthenticated } = useAuth();
 
   // Use internal state for non-single cards, external state for single cards
   const isShowingReservation = single
@@ -33,6 +38,12 @@ export default function MealCard({
   const isShowingReview = single ? showReview : internalShowReview;
 
   const handleReservationToggle = () => {
+    if (!isAuthenticated) {
+      setAuthMode("login");
+      setShowAuthModal(true);
+      return;
+    }
+
     if (single && onReservationToggle) {
       onReservationToggle();
     } else {
@@ -41,6 +52,12 @@ export default function MealCard({
   };
 
   const handleReviewToggle = () => {
+    if (!isAuthenticated) {
+      setAuthMode("login");
+      setShowAuthModal(true);
+      return;
+    }
+
     if (single && onReviewToggle) {
       onReviewToggle();
     } else {
@@ -142,10 +159,16 @@ export default function MealCard({
               ? "Fully Booked"
               : isShowingReservation
               ? "Close Reservation"
-              : "Reserve"}
+              : isAuthenticated
+              ? "Reserve"
+              : "Sign In to Reserve"}
           </button>
           <button className={styles.button} onClick={handleReviewToggle}>
-            {isShowingReview ? "Close Review" : "Leave Review"}
+            {isShowingReview
+              ? "Close Review"
+              : isAuthenticated
+              ? "Leave Review"
+              : "Sign In to Review"}
           </button>
         </div>
       </div>
@@ -153,6 +176,13 @@ export default function MealCard({
       {/* For non-single cards, show forms below */}
       {!single && internalShowReservation && <ReservationForm mealId={id} />}
       {!single && internalShowReview && <ReviewForm mealId={id} />}
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
+      />
     </>
   );
 }

@@ -122,7 +122,6 @@ export default function MealsList({ full = true }) {
       <div className={styles.container}>
         <h2 className={styles.heading}>Meals</h2>
 
-        {/* Search Control */}
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <div className={styles.searchContainer}>
             <input
@@ -147,7 +146,6 @@ export default function MealsList({ full = true }) {
           </div>
         </form>
 
-        {/* Sort Controls */}
         <div className={styles.sortControls}>
           <div className={styles.sortContainer}>
             <label htmlFor="sortKey" className={styles.sortLabel}>

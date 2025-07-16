@@ -1,7 +1,10 @@
 import styles from "./Forms.module.css";
 import api from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ReviewForm({ mealId, onSuccess }) {
+  const { user } = useAuth();
+
   return (
     <form
       className={styles.form}
@@ -18,6 +21,7 @@ export default function ReviewForm({ mealId, onSuccess }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               meal_id: mealId,
+              user_id: user?.id,
               title,
               description,
               stars: rating,
