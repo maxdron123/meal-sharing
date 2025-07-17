@@ -33,7 +33,7 @@ export default function MyMealsPage() {
   const fetchUserMeals = async () => {
     try {
       const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
       let response = await fetch(`${backendUrl}/api/meals/user/${user.id}`);
 
@@ -74,7 +74,7 @@ export default function MyMealsPage() {
     ) {
       try {
         const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
         const response = await fetch(`${backendUrl}/api/meals/${mealId}`, {
           method: "DELETE",
         });

@@ -31,7 +31,7 @@ export default function MyReservationsPage() {
   const fetchUserReservations = async () => {
     try {
       const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
       let response = await fetch(
         `${backendUrl}/api/reservations/user/${user.id}`
@@ -69,7 +69,7 @@ export default function MyReservationsPage() {
     ) {
       try {
         const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
         const response = await fetch(
           `${backendUrl}/api/reservations/${reservationId}`,
           {

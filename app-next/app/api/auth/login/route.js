@@ -20,7 +20,7 @@ export async function POST(request) {
     }
 
     const userResponse = await fetch(
-      `${process.env.BACKEND_API_URL}/api/users/email/${email}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/email/${email}`
     );
 
     if (!userResponse.ok) {
@@ -50,7 +50,7 @@ export async function POST(request) {
     }
 
     // Update last login
-    await fetch(`${process.env.BACKEND_API_URL}/api/users/${user.id}/login`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.id}/login`, {
       method: "PUT",
     });
 

@@ -17,7 +17,7 @@ export async function GET(request) {
     const decoded = verifyToken(token);
 
     // Get user data
-    const backendUrl = process.env.BACKEND_API_URL || "http://localhost:3001";
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const userResponse = await fetch(
       `${backendUrl}/api/users/${decoded.userId}`
     );

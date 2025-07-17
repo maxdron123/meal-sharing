@@ -37,7 +37,7 @@ export default function MyReviewsPage() {
   const fetchUserReviews = async () => {
     try {
       const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
       let response = await fetch(`${backendUrl}/api/reviews/user/${user.id}`);
 
@@ -82,7 +82,7 @@ export default function MyReviewsPage() {
   const handleSaveEdit = async (reviewId) => {
     try {
       const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
       const response = await fetch(`${backendUrl}/api/reviews/${reviewId}`, {
         method: "PUT",
         headers: {
@@ -116,7 +116,7 @@ export default function MyReviewsPage() {
     ) {
       try {
         const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
         const response = await fetch(`${backendUrl}/api/reviews/${reviewId}`, {
           method: "DELETE",
         });
