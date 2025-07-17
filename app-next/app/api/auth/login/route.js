@@ -50,9 +50,12 @@ export async function POST(request) {
     }
 
     // Update last login
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.id}/login`, {
-      method: "PUT",
-    });
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.id}/login`,
+      {
+        method: "PUT",
+      }
+    );
 
     // Generate JWT token
     const token = generateToken({

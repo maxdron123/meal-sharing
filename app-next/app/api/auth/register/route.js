@@ -37,7 +37,8 @@ export async function POST(request) {
       );
     }
 
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
     // Check if user already exists
     const checkUserResponse = await fetch(

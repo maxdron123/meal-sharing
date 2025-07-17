@@ -3,7 +3,7 @@ import { verifyToken } from "@/utils/auth";
 
 // Configure API route for large payloads (Base64 images) - Next.js 14 format
 export const maxDuration = 30;
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
@@ -84,7 +84,8 @@ export async function POST(request) {
       created_by: created_by || decoded.userId,
     };
 
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
     // Try with authentication first
     let backendResponse = await fetch(`${backendUrl}/api/meals`, {
@@ -167,7 +168,8 @@ export async function GET(request) {
     }
 
     // Get user's meals from backend database
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const backendResponse = await fetch(
       `${backendUrl}/api/meals/user/${decoded.userId}`,
       {
