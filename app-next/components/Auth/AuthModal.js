@@ -35,14 +35,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login" }) {
   }, [isOpen, mode]);
 
   if (!mounted || !isOpen) {
-    console.log("Modal not rendering - mounted:", mounted, "isOpen:", isOpen);
     return null;
   }
 
-  console.log("Modal rendering with mode:", mode);
-
   const handleOverlayClick = (e) => {
-    console.log("Overlay clicked");
     if (e.target === e.currentTarget) {
       onClose();
     }

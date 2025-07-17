@@ -22,19 +22,15 @@ export const Meal = z.strictObject({
 export const MealUpdate = Meal.partial();
 export const MealId = z.object({ id: z.coerce.number().int().positive() });
 export const validations = {
-  // POST /Meals
   create: {
     [SEGMENTS.BODY]: Meal,
   },
-  // DELETE /Meals/:id
   delete: {
     [SEGMENTS.PARAMS]: MealId,
   },
-  // GET /Meals/:id
   getById: {
     [SEGMENTS.PARAMS]: MealId,
   },
-  // PATCH /Meals/:id
   update: {
     [SEGMENTS.PARAMS]: MealId,
     [SEGMENTS.BODY]: MealUpdate,

@@ -24,12 +24,31 @@ export default function MealCard({
   showReview,
   averageRating,
   reviewCount,
+  showNotification,
 }) {
   const [internalShowReservation, setInternalShowReservation] = useState(false);
   const [internalShowReview, setInternalShowReview] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const { user, isAuthenticated } = useAuth();
+
+  // Helper function to get image source
+  const getImageSrc = (image) => {
+    if (!image) return "/placeholder-meal.svg";
+
+    // If it's already a Base64 string, use it directly
+    if (image.startsWith("data:image/")) {
+      return image;
+    }
+
+    // If it's a file path (legacy), use it as before
+    if (image.startsWith("/uploads/")) {
+      return image;
+    }
+
+    // Fallback to placeholder
+    return "/placeholder-meal.svg";
+  };
 
   // Use internal state for non-single cards, external state for single cards
   const isShowingReservation = single
@@ -68,7 +87,7 @@ export default function MealCard({
   if (!single) {
     return (
       <div className={styles.card}>
-        <img className={styles.img} src={image} alt={title} />
+        <img className={styles.img} src={getImageSrc(image)} alt={title} />
         <div className={styles.content}>
           <h3 className={styles.title}>{title}</h3>
           <p className={styles.description}>{description}</p>
@@ -114,7 +133,7 @@ export default function MealCard({
   return (
     <>
       <div className={styles.singleCard}>
-        <img className={styles.img} src={image} alt={title} />
+        <img className={styles.img} src={getImageSrc(image)} alt={title} />
         <div className={styles.content}>
           <h3 className={styles.title}>{title}</h3>
           <p className={styles.description}>{description}</p>
@@ -174,8 +193,12 @@ export default function MealCard({
       </div>
 
       {/* For non-single cards, show forms below */}
-      {!single && internalShowReservation && <ReservationForm mealId={id} />}
-      {!single && internalShowReview && <ReviewForm mealId={id} />}
+      {!single && internalShowReservation && (
+        <ReservationForm mealId={id} showNotification={showNotification} />
+      )}
+      {!single && internalShowReview && (
+        <ReviewForm mealId={id} showNotification={showNotification} />
+      )}
 
       {/* Authentication Modal */}
       <AuthModal

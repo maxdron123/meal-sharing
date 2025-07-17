@@ -12,13 +12,11 @@ export default function AuthButton() {
   const { user, logout, loading } = useAuth();
 
   const handleLogin = () => {
-    console.log("Login button clicked");
     setAuthMode("login");
     setShowAuthModal(true);
   };
 
   const handleRegister = () => {
-    console.log("Register button clicked");
     setAuthMode("register");
     setShowAuthModal(true);
   };

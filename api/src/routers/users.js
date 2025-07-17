@@ -6,9 +6,8 @@ import {
   validateUserId,
 } from "./users_validator.js";
 
-const usersRouter = express.Router();
+export const usersRouter = express.Router();
 
-// GET /users - Get all users (for admin purposes)
 usersRouter.get("/", async (req, res) => {
   try {
     const users = await knex("users")
@@ -281,5 +280,3 @@ usersRouter.get("/:id/reviews", validateUserId, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-export { usersRouter };

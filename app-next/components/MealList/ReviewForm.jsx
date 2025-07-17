@@ -2,7 +2,7 @@ import styles from "./Forms.module.css";
 import api from "@/utils/api";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function ReviewForm({ mealId, onSuccess }) {
+export default function ReviewForm({ mealId, onSuccess, showNotification }) {
   const { user } = useAuth();
 
   return (
@@ -29,15 +29,27 @@ export default function ReviewForm({ mealId, onSuccess }) {
             }),
           });
           if (res.ok) {
-            alert("Review submitted successfully!");
+            if (showNotification) {
+              showNotification("Review submitted successfully!", "success");
+            } else {
+              alert("Review submitted successfully!");
+            }
             form.reset();
             if (onSuccess) onSuccess();
           } else {
             const error = await res.text();
-            alert("Review failed: " + error);
+            if (showNotification) {
+              showNotification("Review failed: " + error, "error");
+            } else {
+              alert("Review failed: " + error);
+            }
           }
         } catch (err) {
-          alert("Review failed: " + err.message);
+          if (showNotification) {
+            showNotification("Review failed: " + err.message, "error");
+          } else {
+            alert("Review failed: " + err.message);
+          }
         }
       }}
     >

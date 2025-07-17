@@ -25,19 +25,15 @@ export const ReservationId = z.object({
   id: z.coerce.number().int().positive(),
 });
 export const validations = {
-  // POST /Reservations
   create: {
     [SEGMENTS.BODY]: Reservation,
   },
-  // DELETE /Reservations/:id
   delete: {
     [SEGMENTS.PARAMS]: ReservationId,
   },
-  // GET /Reservations/:id
   getById: {
     [SEGMENTS.PARAMS]: ReservationId,
   },
-  // PATCH /Reservations/:id
   update: {
     [SEGMENTS.PARAMS]: ReservationId,
     [SEGMENTS.BODY]: ReservationUpdate,

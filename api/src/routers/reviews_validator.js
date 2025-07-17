@@ -19,19 +19,15 @@ export const Review = z.strictObject({
 export const ReviewUpdate = Review.partial();
 export const ReviewId = z.object({ id: z.coerce.number().int().positive() });
 export const validations = {
-  // POST /Reviews
   create: {
     [SEGMENTS.BODY]: Review,
   },
-  // DELETE /Reviews/:id
   delete: {
     [SEGMENTS.PARAMS]: ReviewId,
   },
-  // GET /Reviews/:id
   getById: {
     [SEGMENTS.PARAMS]: ReviewId,
   },
-  // PATCH /Reviews/:id
   update: {
     [SEGMENTS.PARAMS]: ReviewId,
     [SEGMENTS.BODY]: ReviewUpdate,

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import CreateMealForm from "./CreateMealForm";
+import Notification from "@/components/Notification/Notification";
+import { useNotification } from "@/hooks/useNotification";
 import styles from "./my-meals.module.css";
 
 export default function MyMealsPage() {
@@ -13,6 +15,8 @@ export default function MyMealsPage() {
   const [meals, setMeals] = useState([]);
   const [loadingMeals, setLoadingMeals] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const { notification, showNotification, hideNotification } =
+    useNotification();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -28,27 +32,21 @@ export default function MyMealsPage() {
 
   const fetchUserMeals = async () => {
     try {
-      // Get user's meals from backend
       const backendUrl =
         process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
 
-      // First try the user-specific endpoint
       let response = await fetch(`${backendUrl}/api/meals/user/${user.id}`);
 
-      // If that fails, fallback to all meals and filter client-side
       if (!response.ok) {
-        console.log("User-specific endpoint failed, trying all meals...");
         response = await fetch(`${backendUrl}/api/meals`);
 
         if (response.ok) {
           const allMeals = await response.json();
-          // Filter meals by user ID on the client side
           const userMeals = allMeals.filter(
             (meal) => meal.created_by === user.id
           );
           setMeals(userMeals);
         } else {
-          console.error("Failed to fetch meals from backend");
           setMeals([]);
         }
       } else {
@@ -58,15 +56,12 @@ export default function MyMealsPage() {
 
       setLoadingMeals(false);
     } catch (error) {
-      console.error("Error fetching meals:", error);
-      // No fallback data - show empty state if error occurs
       setMeals([]);
       setLoadingMeals(false);
     }
   };
 
   const handleMealCreated = (newMeal) => {
-    // Refresh the meal list to show the newly created meal
     fetchUserMeals();
     setShowCreateForm(false);
   };
@@ -85,18 +80,29 @@ export default function MyMealsPage() {
         });
 
         if (response.ok) {
-          // Remove meal from state
           setMeals(meals.filter((meal) => meal.id !== mealId));
-          console.log("Meal deleted successfully");
+          showNotification("Meal deleted successfully!", "success");
         } else {
-          console.error("Failed to delete meal from backend");
-          alert("Failed to delete meal. Please try again.");
+          showNotification("Failed to delete meal. Please try again.", "error");
         }
       } catch (error) {
-        console.error("Error deleting meal:", error);
-        alert("Failed to delete meal. Please try again.");
+        showNotification("Failed to delete meal. Please try again.", "error");
       }
     }
+  };
+
+  const getImageSrc = (image) => {
+    if (!image) return "/placeholder-meal.svg";
+
+    if (image.startsWith("data:image/")) {
+      return image;
+    }
+
+    if (image.startsWith("/uploads/")) {
+      return image;
+    }
+
+    return "/placeholder-meal.svg";
   };
 
   const getStatusColor = (meal) => {
@@ -187,6 +193,7 @@ export default function MyMealsPage() {
         <CreateMealForm
           onMealCreated={handleMealCreated}
           onCancel={() => setShowCreateForm(false)}
+          showNotification={showNotification}
         />
       )}
 
@@ -213,15 +220,10 @@ export default function MyMealsPage() {
             <div key={meal.id} className={styles.mealCard}>
               <div className={styles.mealImage}>
                 <img
-                  src={meal.image}
+                  src={getImageSrc(meal.image)}
                   alt={meal.title}
                   onError={(e) => {
-                    e.target.src = `data:image/svg+xml;base64,${btoa(`
-                      <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="100%" height="100%" fill="#f0f0f0"/>
-                        <text x="50%" y="50%" text-anchor="middle" fill="#999" font-size="18">Meal Image</text>
-                      </svg>
-                    `)}`;
+                    e.target.src = "/placeholder-meal.svg";
                   }}
                 />
                 <div
@@ -287,6 +289,13 @@ export default function MyMealsPage() {
           </Link>
         </div>
       </div>
+
+      <Notification
+        message={notification?.message}
+        type={notification?.type}
+        onClose={hideNotification}
+        duration={notification?.duration}
+      />
     </div>
   );
 }

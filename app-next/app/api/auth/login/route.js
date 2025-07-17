@@ -5,7 +5,6 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json();
 
-    // Validation
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
@@ -20,7 +19,6 @@ export async function POST(request) {
       );
     }
 
-    // Get user by email
     const userResponse = await fetch(
       `${process.env.BACKEND_API_URL}/api/users/email/${email}`
     );

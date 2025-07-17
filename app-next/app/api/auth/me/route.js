@@ -23,7 +23,6 @@ export async function GET(request) {
     );
 
     if (!userResponse.ok) {
-      console.log("User lookup failed:", userResponse.status);
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 

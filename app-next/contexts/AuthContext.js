@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is authenticated on app load
   useEffect(() => {
     checkAuth();
   }, []);
@@ -32,11 +31,9 @@ export function AuthProvider({ children }) {
         const userData = await response.json();
         setUser(userData);
       } else {
-        // Token is invalid, remove it
         Cookies.remove("auth-token");
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
       Cookies.remove("auth-token");
     } finally {
       setLoading(false);

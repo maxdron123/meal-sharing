@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./reservations.module.css";
+import Notification from "@/components/Notification/Notification";
+import { useNotification } from "@/hooks/useNotification";
 
 export default function MyReservationsPage() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [reservations, setReservations] = useState([]);
   const [loadingReservations, setLoadingReservations] = useState(true);
+  const { notification, showNotification, hideNotification } =
+    useNotification();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -79,12 +83,18 @@ export default function MyReservationsPage() {
               (reservation) => reservation.id !== reservationId
             )
           );
-          alert("Reservation cancelled successfully!");
+          showNotification("Reservation cancelled successfully!", "success");
         } else {
-          alert("Failed to cancel reservation. Please try again.");
+          showNotification(
+            "Failed to cancel reservation. Please try again.",
+            "error"
+          );
         }
       } catch (error) {
-        alert("Failed to cancel reservation. Please try again.");
+        showNotification(
+          "Failed to cancel reservation. Please try again.",
+          "error"
+        );
       }
     }
   };
@@ -93,7 +103,7 @@ export default function MyReservationsPage() {
     if (mealId) {
       router.push(`/meals/${mealId}`);
     } else {
-      alert("Meal details not available");
+      showNotification("Meal details not available", "warning");
     }
   };
 
@@ -297,6 +307,13 @@ export default function MyReservationsPage() {
           </Link>
         </div>
       </div>
+
+      <Notification
+        message={notification?.message}
+        type={notification?.type}
+        onClose={hideNotification}
+        duration={notification?.duration}
+      />
     </div>
   );
 }

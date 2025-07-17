@@ -5,7 +5,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import Cookies from "js-cookie";
 import styles from "./CreateMealForm.module.css";
 
-export default function CreateMealForm({ onMealCreated, onCancel }) {
+export default function CreateMealForm({
+  onMealCreated,
+  onCancel,
+  showNotification,
+}) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,29 +34,61 @@ export default function CreateMealForm({ onMealCreated, onCancel }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         setError("Please select a valid image file");
         return;
       }
 
-      // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         setError("Image size must be less than 5MB");
         return;
       }
 
-      setFormData((prev) => ({
-        ...prev,
-        image: file,
-      }));
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
+      img.onload = () => {
+        const maxSize = 800;
+        let { width, height } = img;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const base64String = canvas.toDataURL("image/jpeg", 0.8);
+
+        if (base64String.length > 8 * 1024 * 1024) {
+          setError(
+            "Image is too large even after compression. Please use a smaller image."
+          );
+          return;
+        }
+
+        setFormData((prev) => ({
+          ...prev,
+          image: base64String,
+        }));
+        setImagePreview(base64String);
       };
-      reader.readAsDataURL(file);
+
+      img.onerror = () => {
+        setError("Failed to process image. Please try a different image.");
+      };
+
+      img.src = URL.createObjectURL(file);
       setError("");
     }
   };
@@ -108,49 +144,43 @@ export default function CreateMealForm({ onMealCreated, onCancel }) {
     setLoading(true);
 
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      submitData.append("title", formData.title.trim());
-      submitData.append("description", formData.description.trim());
-      submitData.append("price", parseFloat(formData.price));
-      submitData.append(
-        "max_reservations",
-        parseInt(formData.max_reservations)
-      );
-      submitData.append("location", formData.location.trim());
+      const submitData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price),
+        max_reservations: parseInt(formData.max_reservations),
+        location: formData.location.trim(),
+        image: formData.image,
+        created_by: user.id,
+        when: new Date().toISOString(),
+      };
 
-      if (formData.image) {
-        submitData.append("image", formData.image);
-      }
-
-      // Get token for Authorization header
       const token = Cookies.get("auth-token");
-      const headers = {};
+      const headers = {
+        "Content-Type": "application/json",
+      };
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch("/api/meals", {
         method: "POST",
-        body: submitData,
+        body: JSON.stringify(submitData),
         credentials: "include",
         headers: headers,
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
-
       const data = await response.json();
-      console.log("Response data:", data);
 
       if (response.ok) {
-        // Success - call the parent callback with the new meal
+        if (showNotification) {
+          showNotification("Meal created successfully!", "success");
+        }
         onMealCreated(data.meal);
       } else {
         setError(data.message || "Failed to create meal");
       }
     } catch (error) {
-      console.error("Error creating meal:", error);
       setError("Network error. Please try again.");
     }
 

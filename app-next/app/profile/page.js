@@ -41,10 +41,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    // TODO: Implement profile update API call
-    console.log("Saving profile:", formData);
     setIsEditing(false);
-    // After backend integration, this will update the user data
   };
 
   if (loading) {
@@ -195,6 +192,12 @@ export default function ProfilePage() {
             <div className={styles.actionIcon}>⭐</div>
             <h4>My Reviews</h4>
             <p>See all your meal reviews</p>
+          </Link>
+
+          <Link href="/my-meals" className={styles.actionCard}>
+            <div className={styles.actionIcon}>🍽️</div>
+            <h4>My Meals</h4>
+            <p>Manage your meal offerings</p>
           </Link>
 
           <div className={styles.actionCard}>

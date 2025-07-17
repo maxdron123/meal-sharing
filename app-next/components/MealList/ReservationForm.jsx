@@ -2,7 +2,11 @@ import styles from "./Forms.module.css";
 import api from "@/utils/api";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function ReservationForm({ mealId, onSuccess }) {
+export default function ReservationForm({
+  mealId,
+  onSuccess,
+  showNotification,
+}) {
   const { user } = useAuth();
 
   return (
@@ -31,15 +35,27 @@ export default function ReservationForm({ mealId, onSuccess }) {
             }),
           });
           if (res.ok) {
-            alert("Reservation created successfully!");
+            if (showNotification) {
+              showNotification("Reservation created successfully!", "success");
+            } else {
+              alert("Reservation created successfully!");
+            }
             form.reset();
             if (onSuccess) onSuccess();
           } else {
             const error = await res.text();
-            alert("Reservation failed: " + error);
+            if (showNotification) {
+              showNotification("Reservation failed: " + error, "error");
+            } else {
+              alert("Reservation failed: " + error);
+            }
           }
         } catch (err) {
-          alert("Reservation failed: " + err.message);
+          if (showNotification) {
+            showNotification("Reservation failed: " + err.message, "error");
+          } else {
+            alert("Reservation failed: " + err.message);
+          }
         }
       }}
     >

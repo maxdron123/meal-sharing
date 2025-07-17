@@ -9,7 +9,7 @@ function getRandomMeals(meals, count) {
   return shuffled.slice(0, count);
 }
 
-export default function MealsList({ full = true }) {
+export default function MealsList({ full = true, showNotification }) {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,22 +31,14 @@ export default function MealsList({ full = true }) {
       ? api(`/meals?${params.toString()}`)
       : api("/meals");
 
-    console.log("Fetching meals with URL:", url);
-    console.log("Sort params:", {
-      sortKey: sortKeyParam,
-      sortDir: sortDirParam,
-    });
-
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Received data:", data);
         setMeals(data);
         setDisplayedMeals(data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching meals:", error);
         setLoading(false);
       });
   };
@@ -111,6 +103,7 @@ export default function MealsList({ full = true }) {
                 reviewCount={meal.review_count}
                 key={meal.id}
                 single={false}
+                showNotification={showNotification}
               />
             ))}
           </div>
@@ -240,6 +233,7 @@ export default function MealsList({ full = true }) {
                 reviewCount={meal.review_count}
                 key={meal.id}
                 single={false}
+                showNotification={showNotification}
               />
             ))}
           </div>

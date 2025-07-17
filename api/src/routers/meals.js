@@ -128,7 +128,6 @@ mealsRouter.get("/", async (req, res) => {
         query = query.orderBy(sortKey, direction);
       }
     } else {
-      // Default ordering by ID if no sortKey is provided
       query = query.orderBy("id");
     }
     const meals = await query;
@@ -152,7 +151,6 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
   } = req.body;
 
   try {
-    // Convert ISO datetime to MySQL datetime format
     const mysqlDatetime = new Date(when)
       .toISOString()
       .slice(0, 19)
@@ -165,20 +163,17 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
       when: mysqlDatetime,
       max_reservations,
       price,
-      created_date: created_date || new Date().toISOString().split("T")[0], // Default to today if not provided
+      created_date: created_date || new Date().toISOString().split("T")[0],
       image,
-      created_by, // Add user ID for meal ownership
+      created_by,
     };
     const [mealId] = await knex("meals").insert(newMeal);
     const createdMeal = await knex("meals").where({ id: mealId }).first();
-    res
-      .status(201)
-      .json({
-        message: `Created meal ${createdMeal.title}!`,
-        meal: createdMeal,
-      });
-  } catch (error) {
-    console.error("Error creating meal:", error);
+    res.status(201).json({
+      message: `Created meal ${createdMeal.title}!`,
+      meal: createdMeal,
+    });
+  } catch {
     res.status(500).json({ error: "Failed to create meal" });
   }
 });
@@ -289,18 +284,26 @@ mealsRouter.put("/:id", validate(validations.update), async (req, res) => {
     max_reservations,
     price,
     created_date,
+    image,
   } = req.body;
 
   try {
-    const updatedMeal = {
-      title,
-      description,
-      location,
-      when,
-      max_reservations,
-      price,
-      created_date,
-    };
+    const updatedMeal = {};
+
+    if (title !== undefined) updatedMeal.title = title;
+    if (description !== undefined) updatedMeal.description = description;
+    if (location !== undefined) updatedMeal.location = location;
+    if (when !== undefined) {
+      updatedMeal.when = new Date(when)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+    }
+    if (max_reservations !== undefined)
+      updatedMeal.max_reservations = max_reservations;
+    if (price !== undefined) updatedMeal.price = price;
+    if (created_date !== undefined) updatedMeal.created_date = created_date;
+    if (image !== undefined) updatedMeal.image = image; // Support Base64 image updates
     const updatedRows = await knex("meals")
       .where({ id: mealId })
       .update(updatedMeal);

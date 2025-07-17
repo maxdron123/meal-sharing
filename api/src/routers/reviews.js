@@ -1,6 +1,5 @@
 import express from "express";
 import knex from "../database_client.js";
-import { StatusCodes } from "http-status-codes";
 import { validations } from "./reviews_validator.js";
 import { validate } from "../validate_middleware.js";
 
@@ -12,6 +11,31 @@ reviewsRouter.get("/", async (req, res) => {
     res.json(reviews);
   } catch {
     res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
+reviewsRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const reviews = await knex("reviews")
+      .select(
+        "reviews.id as id",
+        "reviews.title",
+        "reviews.description",
+        "reviews.meal_id",
+        "reviews.stars",
+        "reviews.created_date",
+        "reviews.user_id",
+        "meals.title as meal_title",
+        "meals.image as meal_image",
+        "meals.location as meal_location"
+      )
+      .leftJoin("meals", "reviews.meal_id", "meals.id")
+      .where("reviews.user_id", userId)
+      .orderBy("reviews.id", "desc");
+    res.json(reviews);
+  } catch {
+    res.status(500).json({ error: "Failed to fetch user reviews" });
   }
 });
 
@@ -31,28 +55,8 @@ reviewsRouter.post("/", validate(validations.create), async (req, res) => {
     };
     await knex("reviews").insert(newReview);
     res.status(201).end();
-  } catch (error) {
-    console.error("Error creating review:", error);
+  } catch {
     res.status(500).json({ error: "Failed to create review" });
-  }
-});
-
-reviewsRouter.get("/user/:userId", async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const reviews = await knex("reviews")
-      .select(
-        "reviews.*",
-        "meals.title as meal_title",
-        "meals.image as meal_image"
-      )
-      .leftJoin("meals", "reviews.meal_id", "meals.id")
-      .where("reviews.user_id", userId)
-      .orderBy("reviews.id", "desc");
-    res.json(reviews);
-  } catch (error) {
-    console.error("Error fetching user reviews:", error);
-    res.status(500).json({ error: "Failed to fetch user reviews" });
   }
 });
 
@@ -72,27 +76,36 @@ reviewsRouter.get("/:id", async (req, res) => {
 reviewsRouter.delete("/:id", validate(validations.delete), async (req, res) => {
   try {
     const reviewId = req.params.id;
-    const deletedCount = await knex("reviews").where({ id: reviewId }).del();
-    if (deletedCount === 0) {
+
+    const existingReview = await knex("reviews")
+      .where({ id: reviewId })
+      .first();
+
+    if (!existingReview) {
       return res.status(404).json({ error: "Review not found" });
     }
-    res.status(StatusCodes.NO_CONTENT).end();
+
+    const deletedRows = await knex("reviews").where({ id: reviewId }).del();
+
+    if (deletedRows === 0) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    res.status(200).json({ success: "Review deleted successfully" });
   } catch {
     res.status(500).json({ error: "Failed to delete review" });
   }
 });
 
 reviewsRouter.put("/:id", validate(validations.update), async (req, res) => {
-  const { title, description, review_id, stars, created_date } = req.body;
+  const { title, description, stars } = req.body;
 
   try {
     const reviewId = req.params.id;
     const updatedReview = {
       title,
       description,
-      review_id,
       stars,
-      created_date,
     };
     const updatedRows = await knex("reviews")
       .where({ id: reviewId })
@@ -100,7 +113,8 @@ reviewsRouter.put("/:id", validate(validations.update), async (req, res) => {
     if (updatedRows === 0) {
       return res.status(404).json({ error: "Review not found" });
     }
-    res.status(200).end();
+    const review = await knex("reviews").where({ id: reviewId }).first();
+    res.json(review);
   } catch {
     res.status(500).json({ error: "Failed to update review" });
   }

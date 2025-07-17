@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./reviews.module.css";
+import Notification from "@/components/Notification/Notification";
+import { useNotification } from "@/hooks/useNotification";
 
 export default function MyReviewsPage() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -17,6 +19,8 @@ export default function MyReviewsPage() {
     description: "",
     stars: 5,
   });
+  const { notification, showNotification, hideNotification } =
+    useNotification();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -32,29 +36,21 @@ export default function MyReviewsPage() {
 
   const fetchUserReviews = async () => {
     try {
-      // Get user's reviews from backend
       const backendUrl =
         process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
 
-      // Try to fetch user-specific reviews
       let response = await fetch(`${backendUrl}/api/reviews/user/${user.id}`);
 
-      // If that fails, fallback to all reviews and filter client-side
       if (!response.ok) {
-        console.log(
-          "User-specific reviews endpoint failed, trying all reviews..."
-        );
         response = await fetch(`${backendUrl}/api/reviews`);
 
         if (response.ok) {
           const allReviews = await response.json();
-          // Filter reviews by user ID on the client side
           const userReviews = allReviews.filter(
             (review) => review.user_id === user.id
           );
           setReviews(userReviews);
         } else {
-          console.error("Failed to fetch reviews from backend");
           setReviews([]);
         }
       } else {
@@ -64,7 +60,6 @@ export default function MyReviewsPage() {
 
       setLoadingReviews(false);
     } catch (error) {
-      console.error("Error fetching reviews:", error);
       setReviews([]);
       setLoadingReviews(false);
     }
@@ -84,21 +79,70 @@ export default function MyReviewsPage() {
     setEditFormData({ title: "", description: "", stars: 5 });
   };
 
-  const handleSaveEdit = (reviewId) => {
-    // TODO: Update review in backend
-    setReviews(
-      reviews.map((review) =>
-        review.id === reviewId ? { ...review, ...editFormData } : review
-      )
-    );
-    setEditingReview(null);
-    setEditFormData({ title: "", description: "", stars: 5 });
+  const handleSaveEdit = async (reviewId) => {
+    try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+      const response = await fetch(`${backendUrl}/api/reviews/${reviewId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (response.ok) {
+        setReviews(
+          reviews.map((review) =>
+            review.id === reviewId ? { ...review, ...editFormData } : review
+          )
+        );
+        setEditingReview(null);
+        setEditFormData({ title: "", description: "", stars: 5 });
+        showNotification("Review updated successfully!", "success");
+      } else {
+        showNotification("Failed to update review. Please try again.", "error");
+      }
+    } catch (error) {
+      showNotification("Failed to update review. Please try again.", "error");
+    }
   };
 
-  const handleDeleteReview = (reviewId) => {
-    if (window.confirm("Are you sure you want to delete this review?")) {
-      // TODO: Delete review from backend
-      setReviews(reviews.filter((review) => review.id !== reviewId));
+  const handleDeleteReview = async (reviewId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this review? This action cannot be undone."
+      )
+    ) {
+      try {
+        const backendUrl =
+          process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3001";
+        const response = await fetch(`${backendUrl}/api/reviews/${reviewId}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          setReviews((prevReviews) =>
+            prevReviews.filter((review) => review.id !== reviewId)
+          );
+          showNotification("Review deleted successfully!", "success");
+        } else {
+          showNotification(
+            "Failed to delete review. Please try again.",
+            "error"
+          );
+        }
+      } catch (error) {
+        showNotification("Failed to delete review. Please try again.", "error");
+      }
+    }
+  };
+
+  const handleViewMealDetails = (mealId) => {
+    if (mealId) {
+      router.push(`/meals/${mealId}`);
+    } else {
+      showNotification("Meal details not available", "warning");
     }
   };
 
@@ -205,13 +249,15 @@ export default function MyReviewsPage() {
             <div key={review.id} className={styles.reviewCard}>
               <div className={styles.mealImage}>
                 <img
-                  src={review.meal?.image || review.image}
-                  alt={review.meal?.title || review.title}
+                  src={
+                    review.meal_image || review.image || "/placeholder-meal.jpg"
+                  }
+                  alt={review.meal_title || review.title || "Meal"}
                   onError={(e) => {
                     e.target.src = `data:image/svg+xml;base64,${btoa(`
                       <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
                         <rect width="100%" height="100%" fill="#f0f0f0"/>
-                        <text x="50%" y="50%" text-anchor="middle" fill="#999" font-size="18">Review Image</text>
+                        <text x="50%" y="50%" text-anchor="middle" fill="#999" font-size="18">Meal Image</text>
                       </svg>
                     `)}`;
                   }}
@@ -220,7 +266,7 @@ export default function MyReviewsPage() {
 
               <div className={styles.reviewContent}>
                 <div className={styles.reviewHeader}>
-                  <h3>{review.meal?.title || "Meal"}</h3>
+                  <h3>{review.meal_title || "Meal"}</h3>
                   <div className={styles.reviewMeta}>
                     <span className={styles.reviewDate}>
                       Reviewed: {formatDate(review.created_date)}
@@ -289,6 +335,12 @@ export default function MyReviewsPage() {
                     <p className={styles.reviewText}>{review.description}</p>
                     <div className={styles.reviewActions}>
                       <button
+                        onClick={() => handleViewMealDetails(review.meal_id)}
+                        className={styles.viewBtn}
+                      >
+                        View Meal Details
+                      </button>
+                      <button
                         onClick={() => handleEditClick(review)}
                         className={styles.editBtn}
                       >
@@ -320,12 +372,23 @@ export default function MyReviewsPage() {
             <span className={styles.linkIcon}>📅</span>
             <span>My Reservations</span>
           </Link>
-          <Link href="/meals" className={styles.quickLink}>
+          <Link href="/my-meals" className={styles.quickLink}>
             <span className={styles.linkIcon}>🍽️</span>
+            <span>My Meals</span>
+          </Link>
+          <Link href="/meals" className={styles.quickLink}>
+            <span className={styles.linkIcon}>🔍</span>
             <span>Browse Meals</span>
           </Link>
         </div>
       </div>
+
+      <Notification
+        message={notification?.message}
+        type={notification?.type}
+        onClose={hideNotification}
+        duration={notification?.duration}
+      />
     </div>
   );
 }

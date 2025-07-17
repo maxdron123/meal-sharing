@@ -77,8 +77,7 @@ reservationsRouter.post("/", validate(validations.create), async (req, res) => {
     res
       .status(201)
       .send(`Created reservation for ${createdReservation.contact_name}!`);
-  } catch (error) {
-    console.error("Error creating reservation:", error);
+  } catch {
     res.status(500).json({ error: "Failed to create reservation" });
   }
 });

@@ -5,7 +5,9 @@ import ReservationForm from "@/components/MealList/ReservationForm";
 import ReviewForm from "@/components/MealList/ReviewForm";
 import ReviewCard from "@/components/MealList/ReviewCard";
 import Rating from "@/components/MealList/Rating";
+import Notification from "@/components/Notification/Notification";
 import { useState, useEffect } from "react";
+import { useNotification } from "@/hooks/useNotification";
 import api from "@/utils/api";
 
 export default function MealDetailPage({ params }) {
@@ -15,6 +17,8 @@ export default function MealDetailPage({ params }) {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [showReservation, setShowReservation] = useState(false);
   const [showReview, setShowReview] = useState(false);
+  const { notification, showNotification, hideNotification } =
+    useNotification();
 
   const fetchMeal = async () => {
     try {
@@ -24,7 +28,7 @@ export default function MealDetailPage({ params }) {
         setMeal(mealData);
       }
     } catch (error) {
-      console.error("Error fetching meal:", error);
+      setError("Failed to load meal details");
     } finally {
       setLoading(false);
     }
@@ -38,7 +42,7 @@ export default function MealDetailPage({ params }) {
         setReviews(reviewsData);
       }
     } catch (error) {
-      console.error("Error fetching reviews:", error);
+      setError("Failed to load reviews");
     } finally {
       setReviewsLoading(false);
     }
@@ -100,6 +104,7 @@ export default function MealDetailPage({ params }) {
               <h3 className={styles.formTitle}>Make a Reservation</h3>
               <ReservationForm
                 mealId={meal.id}
+                showNotification={showNotification}
                 onSuccess={() => {
                   fetchMeal();
                   setShowReservation(false);
@@ -113,6 +118,7 @@ export default function MealDetailPage({ params }) {
               <h3 className={styles.formTitle}>Leave a Review</h3>
               <ReviewForm
                 mealId={meal.id}
+                showNotification={showNotification}
                 onSuccess={() => {
                   fetchMeal();
                   fetchReviews();
@@ -139,6 +145,13 @@ export default function MealDetailPage({ params }) {
           )}
         </div>
       </div>
+
+      <Notification
+        message={notification?.message}
+        type={notification?.type}
+        onClose={hideNotification}
+        duration={notification?.duration}
+      />
     </div>
   );
 }
