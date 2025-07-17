@@ -9,7 +9,7 @@ function getRandomMeals(meals, count) {
   return shuffled.slice(0, count);
 }
 
-export default function MealsList({ full = true }) {
+export default function MealsList({ full = true, showNotification }) {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,22 +31,14 @@ export default function MealsList({ full = true }) {
       ? api(`/meals?${params.toString()}`)
       : api("/meals");
 
-    console.log("Fetching meals with URL:", url);
-    console.log("Sort params:", {
-      sortKey: sortKeyParam,
-      sortDir: sortDirParam,
-    });
-
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Received data:", data);
         setMeals(data);
         setDisplayedMeals(data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching meals:", error);
         setLoading(false);
       });
   };
@@ -107,8 +99,11 @@ export default function MealsList({ full = true }) {
                 image={meal.image}
                 availableSpots={meal.available_spots}
                 maxReservations={meal.max_reservations}
+                averageRating={meal.average_rating}
+                reviewCount={meal.review_count}
                 key={meal.id}
                 single={false}
+                showNotification={showNotification}
               />
             ))}
           </div>
@@ -120,7 +115,6 @@ export default function MealsList({ full = true }) {
       <div className={styles.container}>
         <h2 className={styles.heading}>Meals</h2>
 
-        {/* Search Control */}
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <div className={styles.searchContainer}>
             <input
@@ -145,7 +139,6 @@ export default function MealsList({ full = true }) {
           </div>
         </form>
 
-        {/* Sort Controls */}
         <div className={styles.sortControls}>
           <div className={styles.sortContainer}>
             <label htmlFor="sortKey" className={styles.sortLabel}>
@@ -161,6 +154,7 @@ export default function MealsList({ full = true }) {
               <option value="when">Date</option>
               <option value="price">Price</option>
               <option value="max_reservations">Max Reservations</option>
+              <option value="average_rating">Rating</option>
             </select>
           </div>
 
@@ -208,6 +202,8 @@ export default function MealsList({ full = true }) {
                   ? "Date"
                   : sortKey === "max_reservations"
                   ? "Max Reservations"
+                  : sortKey === "average_rating"
+                  ? "Rating"
                   : "Price"}{" "}
                 ({sortDir === "asc" ? "Ascending" : "Descending"})
               </>
@@ -233,8 +229,11 @@ export default function MealsList({ full = true }) {
                 image={meal.image}
                 availableSpots={meal.available_spots}
                 maxReservations={meal.max_reservations}
+                averageRating={meal.average_rating}
+                reviewCount={meal.review_count}
                 key={meal.id}
                 single={false}
+                showNotification={showNotification}
               />
             ))}
           </div>

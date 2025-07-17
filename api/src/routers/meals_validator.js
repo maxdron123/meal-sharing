@@ -15,24 +15,22 @@ export const Meal = z.strictObject({
     .min(1, "Price must be at least 1")
     .max(200, "Price cannot exceed 200"),
   created_date: z.string().optional(),
+  image: z.string().nullable().optional(),
+  created_by: z.number().optional(),
 });
 
 export const MealUpdate = Meal.partial();
 export const MealId = z.object({ id: z.coerce.number().int().positive() });
 export const validations = {
-  // POST /Meals
   create: {
     [SEGMENTS.BODY]: Meal,
   },
-  // DELETE /Meals/:id
   delete: {
     [SEGMENTS.PARAMS]: MealId,
   },
-  // GET /Meals/:id
   getById: {
     [SEGMENTS.PARAMS]: MealId,
   },
-  // PATCH /Meals/:id
   update: {
     [SEGMENTS.PARAMS]: MealId,
     [SEGMENTS.BODY]: MealUpdate,

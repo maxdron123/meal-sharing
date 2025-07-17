@@ -24,7 +24,9 @@ mealsRouter.get("/", async (req, res) => {
         knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
         knex.raw(
           "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
-        )
+        ),
+        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
+        knex.raw("IFNULL(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
@@ -34,6 +36,16 @@ mealsRouter.get("/", async (req, res) => {
           .as("r"),
         "meals.id",
         "r.meal_id"
+      )
+      .leftJoin(
+        knex("reviews")
+          .select("meal_id")
+          .avg("stars as average_rating")
+          .count("* as review_count")
+          .groupBy("meal_id")
+          .as("rv"),
+        "meals.id",
+        "rv.meal_id"
       );
     if (maxPrice !== undefined) {
       if (isNaN(Number(maxPrice))) {
@@ -95,7 +107,12 @@ mealsRouter.get("/", async (req, res) => {
       if (typeof sortKey !== "string") {
         return res.status(400).json({ error: "sortKey must be a string" });
       }
-      const allowedSortKeys = ["when", "max_reservations", "price"];
+      const allowedSortKeys = [
+        "when",
+        "max_reservations",
+        "price",
+        "average_rating",
+      ];
       const allowedSortDirs = ["asc", "desc"];
       if (!allowedSortKeys.includes(sortKey)) {
         return res.status(400).json({ error: "Invalid sortKey" });
@@ -104,9 +121,13 @@ mealsRouter.get("/", async (req, res) => {
       if (!allowedSortDirs.includes(direction)) {
         return res.status(400).json({ error: "Invalid sortDir" });
       }
-      query = query.orderBy(sortKey, direction);
+
+      if (sortKey === "average_rating") {
+        query = query.orderByRaw(`IFNULL(rv.average_rating, 0) ${direction}`);
+      } else {
+        query = query.orderBy(sortKey, direction);
+      }
     } else {
-      // Default ordering by ID if no sortKey is provided
       query = query.orderBy("id");
     }
     const meals = await query;
@@ -125,23 +146,77 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
     max_reservations,
     price,
     created_date,
+    image,
+    created_by,
   } = req.body;
 
   try {
+    const mysqlDatetime = new Date(when)
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+
     const newMeal = {
       title,
       description,
       location,
-      when,
+      when: mysqlDatetime,
       max_reservations,
       price,
-      created_date,
+      created_date: created_date || new Date().toISOString().split("T")[0],
+      image,
+      created_by,
     };
     const [mealId] = await knex("meals").insert(newMeal);
     const createdMeal = await knex("meals").where({ id: mealId }).first();
-    res.status(201).send(`Created meal ${createdMeal.title}!`);
+    res.status(201).json({
+      message: `Created meal ${createdMeal.title}!`,
+      meal: createdMeal,
+    });
   } catch {
     res.status(500).json({ error: "Failed to create meal" });
+  }
+});
+
+mealsRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const meals = await knex("meals")
+      .select(
+        "meals.*",
+        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw(
+          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+        ),
+        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
+        knex.raw("IFNULL(rv.review_count, 0) as review_count")
+      )
+      .leftJoin(
+        knex("reservations")
+          .select("meal_id")
+          .count("* as total_reservations")
+          .groupBy("meal_id")
+          .as("r"),
+        "meals.id",
+        "r.meal_id"
+      )
+      .leftJoin(
+        knex("reviews")
+          .select("meal_id")
+          .avg("stars as average_rating")
+          .count("* as review_count")
+          .groupBy("meal_id")
+          .as("rv"),
+        "meals.id",
+        "rv.meal_id"
+      )
+      .where("meals.created_by", userId)
+      .orderBy("meals.id", "desc");
+
+    res.json(meals);
+  } catch (error) {
+    console.error("Error fetching user meals:", error);
+    res.status(500).json({ error: "Failed to fetch user meals" });
   }
 });
 
@@ -154,7 +229,9 @@ mealsRouter.get("/:id", async (req, res) => {
         knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
         knex.raw(
           "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
-        )
+        ),
+        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
+        knex.raw("IFNULL(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
@@ -164,6 +241,16 @@ mealsRouter.get("/:id", async (req, res) => {
           .as("r"),
         "meals.id",
         "r.meal_id"
+      )
+      .leftJoin(
+        knex("reviews")
+          .select("meal_id")
+          .avg("stars as average_rating")
+          .count("* as review_count")
+          .groupBy("meal_id")
+          .as("rv"),
+        "meals.id",
+        "rv.meal_id"
       )
       .where("meals.id", mealId)
       .first();
@@ -197,18 +284,26 @@ mealsRouter.put("/:id", validate(validations.update), async (req, res) => {
     max_reservations,
     price,
     created_date,
+    image,
   } = req.body;
 
   try {
-    const updatedMeal = {
-      title,
-      description,
-      location,
-      when,
-      max_reservations,
-      price,
-      created_date,
-    };
+    const updatedMeal = {};
+
+    if (title !== undefined) updatedMeal.title = title;
+    if (description !== undefined) updatedMeal.description = description;
+    if (location !== undefined) updatedMeal.location = location;
+    if (when !== undefined) {
+      updatedMeal.when = new Date(when)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+    }
+    if (max_reservations !== undefined)
+      updatedMeal.max_reservations = max_reservations;
+    if (price !== undefined) updatedMeal.price = price;
+    if (created_date !== undefined) updatedMeal.created_date = created_date;
+    if (image !== undefined) updatedMeal.image = image; // Support Base64 image updates
     const updatedRows = await knex("meals")
       .where({ id: mealId })
       .update(updatedMeal);

@@ -17,6 +17,7 @@ export const Reservation = z.strictObject({
     .max(15, "Phone number must be at most 15 characters long"),
   contact_name: z.string().min(1, "Contact name is required"),
   contact_email: z.email("Invalid email format").optional(),
+  user_id: z.number().int().positive().optional(),
 });
 
 export const ReservationUpdate = Reservation.partial();
@@ -24,19 +25,15 @@ export const ReservationId = z.object({
   id: z.coerce.number().int().positive(),
 });
 export const validations = {
-  // POST /Reservations
   create: {
     [SEGMENTS.BODY]: Reservation,
   },
-  // DELETE /Reservations/:id
   delete: {
     [SEGMENTS.PARAMS]: ReservationId,
   },
-  // GET /Reservations/:id
   getById: {
     [SEGMENTS.PARAMS]: ReservationId,
   },
-  // PATCH /Reservations/:id
   update: {
     [SEGMENTS.PARAMS]: ReservationId,
     [SEGMENTS.BODY]: ReservationUpdate,

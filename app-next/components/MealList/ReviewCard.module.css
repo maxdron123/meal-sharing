@@ -1,0 +1,140 @@
+.reviewCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  animation: slideInUp 0.4s ease-out;
+}
+
+.reviewCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(13, 71, 161, 0.1);
+}
+
+.reviewRating {
+  display: flex;
+  align-items: center;
+}
+
+.reviewDate {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+.reviewContent {
+  margin-bottom: 16px;
+}
+
+.reviewTitle {
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0d47a1;
+  line-height: 1.3;
+}
+
+.reviewDescription {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  text-align: justify;
+}
+
+.reviewFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(13, 71, 161, 0.05);
+}
+
+.reviewAuthor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.authorIcon {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.authorName {
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .reviewCard {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .reviewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .reviewTitle {
+    font-size: 1.1rem;
+  }
+
+  .reviewDescription {
+    font-size: 0.95rem;
+  }
+
+  .reviewFooter {
+    justify-content: center;
+  }
+}
+
+.noReviews {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.noReviews .icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.noReviews .message {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.noReviews .submessage {
+  font-size: 0.9rem;
+  color: #999;
+}

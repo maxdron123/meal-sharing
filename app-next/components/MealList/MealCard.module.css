@@ -230,3 +230,52 @@
   background: #ccc !important;
   transform: none !important;
 }
+
+.ratingSection {
+  margin: 16px 0;
+  text-align: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(13, 71, 161, 0.1);
+}
+
+.singleCard .ratingSection {
+  margin: 20px 0 24px 0;
+  padding: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(227, 242, 253, 0.7) 100%
+  );
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.compactRating {
+  margin: 8px 0 4px 0;
+  text-align: center;
+}
+
+.compactRating .ratingContainer {
+  margin: 0;
+  gap: 4px;
+}
+
+.compactRating .stars {
+  gap: 1px;
+  justify-content: center;
+}
+
+.compactRating .star {
+  font-size: 1rem;
+}
+
+.compactRating .ratingInfo {
+  display: none; /* Hide rating value and count in compact mode */
+}
+
+/* Make sure compact rating is visible */
+.card .compactRating {
+  display: block;
+}
