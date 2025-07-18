@@ -131,7 +131,16 @@ mealsRouter.get("/", async (req, res) => {
       query = query.orderBy("id");
     }
     const meals = await query;
-    res.json(meals);
+    
+    // Convert base64 images to data URLs
+    const mealsWithImages = meals.map(meal => {
+      if (meal.image && !meal.image.startsWith('data:')) {
+        meal.image = `data:image/jpeg;base64,${meal.image}`;
+      }
+      return meal;
+    });
+    
+    res.json(mealsWithImages);
   } catch (error) {
     console.error("Error fetching meals:", error);
     res
@@ -216,7 +225,15 @@ mealsRouter.get("/user/:userId", async (req, res) => {
       .where("meals.created_by", userId)
       .orderBy("meals.id", "desc");
 
-    res.json(meals);
+    // Convert base64 images to data URLs
+    const mealsWithImages = meals.map(meal => {
+      if (meal.image && !meal.image.startsWith('data:')) {
+        meal.image = `data:image/jpeg;base64,${meal.image}`;
+      }
+      return meal;
+    });
+
+    res.json(mealsWithImages);
   } catch (error) {
     console.error("Error fetching user meals:", error);
     res.status(500).json({ error: "Failed to fetch user meals" });
@@ -261,6 +278,12 @@ mealsRouter.get("/:id", async (req, res) => {
     if (!meal) {
       return res.status(404).json({ error: "Meal not found" });
     }
+    
+    // Convert base64 image to data URL
+    if (meal.image && !meal.image.startsWith('data:')) {
+      meal.image = `data:image/jpeg;base64,${meal.image}`;
+    }
+    
     res.json(meal);
   } catch {
     res.status(500).json({ error: "Failed to fetch meal" });
