@@ -64,12 +64,16 @@ export async function POST(request) {
       );
     }
 
-    // Validate Base64 image if provided
-    if (image && !image.startsWith("data:image/")) {
-      return NextResponse.json(
-        { message: "Invalid image format" },
-        { status: 400 }
-      );
+    // Validate and clean Base64 image if provided
+    let cleanImage = null;
+    if (image) {
+      if (image.startsWith("data:image/")) {
+        // Extract just the base64 part
+        cleanImage = image.split(',')[1];
+      } else {
+        // Assume it's already clean base64
+        cleanImage = image;
+      }
     }
 
     const mealData = {
@@ -80,7 +84,7 @@ export async function POST(request) {
       location: location.trim(),
       when: when || new Date().toISOString(),
       created_date: new Date().toISOString().split("T")[0],
-      image: image,
+      image: cleanImage, // Store clean base64
       created_by: created_by || decoded.userId,
     };
 
@@ -110,8 +114,10 @@ export async function POST(request) {
 
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text();
+      console.error("Backend error:", errorText);
+      console.error("Request data:", JSON.stringify(mealData, null, 2));
+      
       let errorMessage = "Failed to create meal";
-
       try {
         const errorData = JSON.parse(errorText);
         errorMessage = errorData.message || errorMessage;

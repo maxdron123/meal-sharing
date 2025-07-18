@@ -94,10 +94,19 @@ export default function MyMealsPage() {
   const getImageSrc = (image) => {
     if (!image) return "/placeholder-meal.svg";
 
+    // If it's already a complete data URL, use it directly
     if (image.startsWith("data:image/")) {
       return image;
     }
 
+    // If it's base64 without data URL prefix, add it
+    if (image.length > 100 && !image.startsWith("http") && !image.startsWith("/")) {
+      // Basic type detection - JPEG starts with /9j/, PNG with iVBOR
+      const imageType = image.startsWith("/9j/") ? "jpeg" : "png";
+      return `data:image/${imageType};base64,${image}`;
+    }
+
+    // If it's a file path (legacy), use it as before
     if (image.startsWith("/uploads/")) {
       return image;
     }

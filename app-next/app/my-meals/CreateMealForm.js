@@ -68,7 +68,9 @@ export default function CreateMealForm({
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
 
+        // Get base64 string and remove data URL prefix for storage
         const base64String = canvas.toDataURL("image/jpeg", 0.8);
+        const base64Data = base64String.split(',')[1]; // Remove data:image/jpeg;base64,
 
         if (base64String.length > 8 * 1024 * 1024) {
           setError(
@@ -79,9 +81,9 @@ export default function CreateMealForm({
 
         setFormData((prev) => ({
           ...prev,
-          image: base64String,
+          image: base64Data, // Store clean base64
         }));
-        setImagePreview(base64String);
+        setImagePreview(base64String); // Show full data URL for preview
       };
 
       img.onerror = () => {
@@ -178,10 +180,12 @@ export default function CreateMealForm({
         }
         onMealCreated(data.meal);
       } else {
+        console.error("Failed to create meal:", data);
         setError(data.message || "Failed to create meal");
       }
     } catch (error) {
-      setError("Network error. Please try again.");
+      console.error("Network error creating meal:", error);
+      setError("Network error. Please check your connection and try again.");
     }
 
     setLoading(false);

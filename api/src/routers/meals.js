@@ -131,15 +131,17 @@ mealsRouter.get("/", async (req, res) => {
       query = query.orderBy("id");
     }
     const meals = await query;
-    
-    // Convert base64 images to data URLs
-    const mealsWithImages = meals.map(meal => {
-      if (meal.image && !meal.image.startsWith('data:')) {
-        meal.image = `data:image/jpeg;base64,${meal.image}`;
+
+    // Convert base64 images to data URLs with proper type detection
+    const mealsWithImages = meals.map((meal) => {
+      if (meal.image && !meal.image.startsWith("data:")) {
+        // Basic image type detection based on base64 header
+        const imageType = meal.image.startsWith("/9j/") ? "jpeg" : "png";
+        meal.image = `data:image/${imageType};base64,${meal.image}`;
       }
       return meal;
     });
-    
+
     res.json(mealsWithImages);
   } catch (error) {
     console.error("Error fetching meals:", error);
@@ -225,10 +227,12 @@ mealsRouter.get("/user/:userId", async (req, res) => {
       .where("meals.created_by", userId)
       .orderBy("meals.id", "desc");
 
-    // Convert base64 images to data URLs
-    const mealsWithImages = meals.map(meal => {
-      if (meal.image && !meal.image.startsWith('data:')) {
-        meal.image = `data:image/jpeg;base64,${meal.image}`;
+    // Convert base64 images to data URLs with proper type detection
+    const mealsWithImages = meals.map((meal) => {
+      if (meal.image && !meal.image.startsWith("data:")) {
+        // Basic image type detection based on base64 header
+        const imageType = meal.image.startsWith("/9j/") ? "jpeg" : "png";
+        meal.image = `data:image/${imageType};base64,${meal.image}`;
       }
       return meal;
     });
@@ -278,12 +282,14 @@ mealsRouter.get("/:id", async (req, res) => {
     if (!meal) {
       return res.status(404).json({ error: "Meal not found" });
     }
-    
-    // Convert base64 image to data URL
-    if (meal.image && !meal.image.startsWith('data:')) {
-      meal.image = `data:image/jpeg;base64,${meal.image}`;
+
+    // Convert base64 image to data URL with proper type detection
+    if (meal.image && !meal.image.startsWith("data:")) {
+      // Basic image type detection based on base64 header
+      const imageType = meal.image.startsWith("/9j/") ? "jpeg" : "png";
+      meal.image = `data:image/${imageType};base64,${meal.image}`;
     }
-    
+
     res.json(meal);
   } catch {
     res.status(500).json({ error: "Failed to fetch meal" });
