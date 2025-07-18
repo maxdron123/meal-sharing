@@ -100,7 +100,11 @@ export default function MyMealsPage() {
     }
 
     // If it's base64 without data URL prefix, add it
-    if (image.length > 100 && !image.startsWith("http") && !image.startsWith("/")) {
+    if (
+      image.length > 100 &&
+      !image.startsWith("http") &&
+      !image.startsWith("/")
+    ) {
       // Basic type detection - JPEG starts with /9j/, PNG with iVBOR
       const imageType = image.startsWith("/9j/") ? "jpeg" : "png";
       return `data:image/${imageType};base64,${image}`;

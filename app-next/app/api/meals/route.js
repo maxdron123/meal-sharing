@@ -69,7 +69,7 @@ export async function POST(request) {
     if (image) {
       if (image.startsWith("data:image/")) {
         // Extract just the base64 part
-        cleanImage = image.split(',')[1];
+        cleanImage = image.split(",")[1];
       } else {
         // Assume it's already clean base64
         cleanImage = image;
@@ -116,7 +116,7 @@ export async function POST(request) {
       const errorText = await backendResponse.text();
       console.error("Backend error:", errorText);
       console.error("Request data:", JSON.stringify(mealData, null, 2));
-      
+
       let errorMessage = "Failed to create meal";
       try {
         const errorData = JSON.parse(errorText);

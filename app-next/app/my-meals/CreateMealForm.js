@@ -70,7 +70,7 @@ export default function CreateMealForm({
 
         // Get base64 string and remove data URL prefix for storage
         const base64String = canvas.toDataURL("image/jpeg", 0.8);
-        const base64Data = base64String.split(',')[1]; // Remove data:image/jpeg;base64,
+        const base64Data = base64String.split(",")[1]; // Remove data:image/jpeg;base64,
 
         if (base64String.length > 8 * 1024 * 1024) {
           setError(
