@@ -21,12 +21,12 @@ mealsRouter.get("/", async (req, res) => {
     let query = knex("meals")
       .select(
         "meals.*",
-        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw("COALESCE(r.total_reservations, 0) as current_reservations"),
         knex.raw(
-          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+          "(meals.max_reservations - COALESCE(r.total_reservations, 0)) as available_spots"
         ),
-        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
-        knex.raw("IFNULL(rv.review_count, 0) as review_count")
+        knex.raw("COALESCE(rv.average_rating, 0) as average_rating"),
+        knex.raw("COALESCE(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
@@ -66,11 +66,11 @@ mealsRouter.get("/", async (req, res) => {
 
       if (availableReservations === "true") {
         query = query.whereRaw(
-          "meals.max_reservations > IFNULL(r.total_reservations, 0)"
+          "meals.max_reservations > COALESCE(r.total_reservations, 0)"
         );
       } else {
         query = query.whereRaw(
-          "meals.max_reservations <= IFNULL(r.total_reservations, 0)"
+          "meals.max_reservations <= COALESCE(r.total_reservations, 0)"
         );
       }
     }
@@ -123,7 +123,7 @@ mealsRouter.get("/", async (req, res) => {
       }
 
       if (sortKey === "average_rating") {
-        query = query.orderByRaw(`IFNULL(rv.average_rating, 0) ${direction}`);
+        query = query.orderByRaw(`COALESCE(rv.average_rating, 0) ${direction}`);
       } else {
         query = query.orderBy(sortKey, direction);
       }
@@ -132,8 +132,11 @@ mealsRouter.get("/", async (req, res) => {
     }
     const meals = await query;
     res.json(meals);
-  } catch {
-    res.status(500).json({ error: "Failed to fetch meals" });
+  } catch (error) {
+    console.error("Error fetching meals:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch meals", details: error.message });
   }
 });
 
@@ -184,12 +187,12 @@ mealsRouter.get("/user/:userId", async (req, res) => {
     const meals = await knex("meals")
       .select(
         "meals.*",
-        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw("COALESCE(r.total_reservations, 0) as current_reservations"),
         knex.raw(
-          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+          "(meals.max_reservations - COALESCE(r.total_reservations, 0)) as available_spots"
         ),
-        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
-        knex.raw("IFNULL(rv.review_count, 0) as review_count")
+        knex.raw("COALESCE(rv.average_rating, 0) as average_rating"),
+        knex.raw("COALESCE(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
@@ -226,12 +229,12 @@ mealsRouter.get("/:id", async (req, res) => {
     const meal = await knex("meals")
       .select(
         "meals.*",
-        knex.raw("IFNULL(r.total_reservations, 0) as current_reservations"),
+        knex.raw("COALESCE(r.total_reservations, 0) as current_reservations"),
         knex.raw(
-          "(meals.max_reservations - IFNULL(r.total_reservations, 0)) as available_spots"
+          "(meals.max_reservations - COALESCE(r.total_reservations, 0)) as available_spots"
         ),
-        knex.raw("IFNULL(rv.average_rating, 0) as average_rating"),
-        knex.raw("IFNULL(rv.review_count, 0) as review_count")
+        knex.raw("COALESCE(rv.average_rating, 0) as average_rating"),
+        knex.raw("COALESCE(rv.review_count, 0) as review_count")
       )
       .leftJoin(
         knex("reservations")
