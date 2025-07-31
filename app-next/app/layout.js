@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar/Navbar.jsx";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata = {
-  title: "HackYourFuture",
+  title: "Meal Sharing",
 };
 
 export default function RootLayout({ children }) {
