@@ -1,227 +1,183 @@
-<img src="./images/hyf.svg" alt="image" width="200px" height="200px">
+# 🍽️ Meal Sharing App
 
-# HackYourFuture project template
+> **A community-driven platform connecting food lovers through authentic home-cooked dining experiences**
 
-This template is meant to be used as part of the meal-sharing and Final Project modules,
-but can work as a starting point for any full stack project.
+## 🌟 Overview
 
-It consists of two packages:
+The Meal Sharing App transforms the way people connect through food by creating a trusted marketplace for authentic dining experiences. Whether you're a culinary enthusiast wanting to share your cooking or a food lover seeking unique local experiences, this platform brings communities together one meal at a time.
 
-- `api` which is a NodeJS project using Express for the API
-- `app` which is Next project using React for the web app
+### ✨ Key Features
 
-Both packages are as small as possible but feel free to add more tools as you see fit.
+- **🏠 Home-Cooked Experiences**: Discover authentic meals prepared by local hosts
+- **🔍 Smart Discovery**: Advanced search and filtering by cuisine, price, location, and availability
+- **📱 Responsive Design**: Seamless experience across all devices with mobile-first approach
+- **⭐ Trust System**: Comprehensive review and rating system for hosts and guests
+- **🔐 Secure Authentication**: JWT-based authentication with persistent sessions
+- **📸 Visual Experience**: High-quality meal imagery with intelligent compression
+- **💬 Community Reviews**: Detailed guest feedback and host reputation building
+- **📊 Real-Time Availability**: Dynamic spot calculation and instant booking confirmation
 
-## Prerequisites
+## 🎯 User Journey
 
-This template assumes that there is a database already set up with tables and data.
+### For Guests
 
-You can start a MySQL instance using Docker with the below command:  
-`docker run --name mysql -e MYSQL_ROOT_PASSWORD=mysql-root-password -e MYSQL_DATABASE=my-database -d -p 3306:3306 mysql:latest`
+1. **Discover** meals through intuitive browsing and smart search
+2. **Explore** detailed meal pages with photos, host info, and authentic reviews
+3. **Book** instantly with real-time availability and secure reservations
+4. **Experience** unique dining and connect with local food culture
+5. **Review** and contribute to the community trust system
 
-Then connect to this instance using any database management tool you prefer, such as MySQL Workbench, to set up your tables and add data.
-![Testing your database](./images/db_test.png)
+### For Hosts
 
-## Getting started
+1. **Create** compelling meal listings with photos and descriptions
+2. **Manage** availability, pricing, and guest capacity
+3. **Connect** with food enthusiasts in their community
+4. **Build** reputation through guest reviews and ratings
+5. **Track** bookings and earnings through personal dashboard
 
-> Before you start, make sure no other projects are running, in order to have the ports free.
+## 🛠️ Technical Architecture
 
-To get started you'll need two terminals.
+### Frontend (Next.js + React)
 
-In the first terminal run the following commands:
+- **Framework**: Next.js 14+ with App Router for optimal performance
+- **Styling**: CSS Modules with modern glassmorphism design
+- **State Management**: React Context API with JWT authentication
+- **Components**: Modular, reusable component architecture
+- **Performance**: Server-side rendering, image optimization, lazy loading
 
-```
-cd api
-cp .env-example .env
-npm install
-npm run dev
-```
+### Backend (Node.js + Express)
 
-You can then test the API using [Postman](https://www.postman.com/) at [http://localhost:3001/api](http://localhost:3001/api).
-![Testing the API with Postman](./images/api_test.png)
+- **API**: RESTful design with comprehensive error handling
+- **Authentication**: JWT tokens with refresh mechanism
+- **Database**: PostgreSQL with optimized queries and indexing
+- **Security**: Input validation, SQL injection prevention, CORS configuration
+- **File Handling**: Base64 image storage with compression
 
-In the second terminal run the following commands:
+### Database Design
 
-```
-cd app
-npm install
-npm run dev
-```
-
-You can then open the web app at [http://localhost:3000](http://localhost:3000).
-![Testing the app with a browser](./images/app_test.png)
-
-## Common issues
-
-### Port conflict
-
-If you see the below error when trying to start either the API or the web app, then you have a port conflict.  
-Some other process is already listening on the port you want to use. Either stop that process or use another port by changing the PORT variable in the `.env` file for the package that is facing the conflict (API or web app).
-
-```
-node:events:496
-      throw er; // Unhandled 'error' event
-      ^
-
-Error: listen EADDRINUSE: address already in use :::3001
-    at Server.setupListenHandle [as _listen2] (node:net:1897:16)
-    at listenInCluster (node:net:1945:12)
-    at Server.listen (node:net:2037:7)
-    at Function.listen (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/express/lib/application.js:635:24)
-    at file:///Users/hyf/dev/hyf/hyf-project-template/api/src/index.js:29:5
-    at ModuleJob.run (node:internal/modules/esm/module_job:222:25)
-    at async ModuleLoader.import (node:internal/modules/esm/loader:323:24)
-    at async loadESM (node:internal/process/esm_loader:28:7)
-    at async handleMainPromise (node:internal/modules/run_main:113:12)
-Emitted 'error' event on Server instance at:
-    at emitErrorNT (node:net:1924:8)
-    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
-  code: 'EADDRINUSE',
-  errno: -48,
-  syscall: 'listen',
-  address: '::',
-  port: 3001
-}
+```sql
+meals ↔ reservations (1:many)
+meals ↔ reviews (1:many)
+users ↔ meals (1:many)
+users ↔ reservations (1:many)
+users ↔ reviews (1:many)
 ```
 
-### Wrong database credentials
+## 🚀 Live Demo
 
-If you see the error below when trying to make a query to your database it means that the variables `DB_USER` and `DB_PASSWORD` don't match the username and password used when starting the database container. Either find the right credentials or recreate your database container and store the new credentials.
+**🌐 Production App**: [https://dist-0jkg.onrender.com](https://dist-0jkg.onrender.com)
 
-```
-/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/packets/packet.js:728
-    const err = new Error(message);
-                ^
+**🔗 API Endpoint**: [https://meal-sharing-api-wpfg.onrender.com/api/meals](https://meal-sharing-api-wpfg.onrender.com/api/meals)
 
-Error: Access denied for user 'root'@'192.168.65.1' (using password: YES)
-    at Packet.asError (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/packets/packet.js:728:17)
-    at ClientHandshake.execute (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/commands/command.js:29:26)
-    at Connection.handlePacket (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/connection.js:481:34)
-    at PacketParser.onPacket (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/connection.js:97:12)
-    at PacketParser.executeStart (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/packet_parser.js:75:16)
-    at Socket.<anonymous> (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/mysql2/lib/connection.js:104:25)
-    at Socket.emit (node:events:519:28)
-    at addChunk (node:internal/streams/readable:559:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
-    at Readable.push (node:internal/streams/readable:390:5) {
-  code: 'ER_ACCESS_DENIED_ERROR',
-  errno: 1045,
-  sqlState: '28000',
-  sqlMessage: "Access denied for user 'root'@'192.168.65.1' (using password: YES)",
-  sql: undefined
-}
-```
+### Demo Credentials
 
-### Using SSL when the database does not support it
+- Create your own account or explore the public meal listings
+- Full guest and host functionality available
 
-If you see the below error, then you are trying to establish a SSL (secure) connection to a database that doesn't support it, most likely you set the value of the environment variable `DB_USE_SSL` to "true" when it should be "false".
+### User Experience
 
-```
-/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/pg/lib/connection.js:77
-          return self.emit('error', new Error('The server does not support SSL connections'))
-                                    ^
+- **Seamless Onboarding**: Quick registration with immediate access to features
+- **Trust & Safety**: Comprehensive review system with verified host profiles
+- **Real-Time Feedback**: Instant availability updates and booking confirmations
+- **Community-Driven**: Social proof through authentic guest experiences
 
-Error: The server does not support SSL connections
-    at Socket.<anonymous> (/Users/hyf/dev/hyf/hyf-project-template/api/node_modules/pg/lib/connection.js:77:37)
-    at Object.onceWrapper (node:events:633:26)
-    at Socket.emit (node:events:518:28)
-    at addChunk (node:internal/streams/readable:559:12)
-    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
-    at Readable.push (node:internal/streams/readable:390:5)
-    at TCP.onStreamRead (node:internal/stream_base_commons:190:23)
+## 🔧 Technical Highlights
 
-Node.js v20.12.2
-[nodemon] app crashed - waiting for file changes before starting...
+### Most Interesting Technical Challenge: Image Management
 
-Database not running or wrong address:
-API listening on port 3001
-node:internal/process/promises:289
-            triggerUncaughtException(err, true /* fromPromise */);
-            ^
+**Problem**: Creating seamless image upload without external services while maintaining performance.
 
-AggregateError [ECONNREFUSED]:
-    at internalConnectMultiple (node:net:1116:18)
-    at afterConnectMultiple (node:net:1683:7) {
-  code: 'ECONNREFUSED',
-  fatal: true,
-  [errors]: [
-    Error: connect ECONNREFUSED ::1:3306
-        at createConnectionError (node:net:1646:14)
-        at afterConnectMultiple (node:net:1676:16) {
-      errno: -61,
-      code: 'ECONNREFUSED',
-      syscall: 'connect',
-      address: '::1',
-      port: 3306
-    },
-    Error: connect ECONNREFUSED 127.0.0.1:3306
-        at createConnectionError (node:net:1646:14)
-        at afterConnectMultiple (node:net:1676:16) {
-      errno: -61,
-      code: 'ECONNREFUSED',
-      syscall: 'connect',
-      address: '127.0.0.1',
-      port: 3306
-    }
-  ]
-}
+**Solution**:
+
+- Client-side image compression using HTML5 Canvas
+- Base64 storage in PostgreSQL for simplicity
+- Automatic image optimization and responsive display
+- Fallback handling for broken images
+
+**Implementation**: See `/app-next/app/my-meals/CreateMealForm.js`
+
+### Complex Features Implemented
+
+#### 1. Dynamic Availability System
+
+```sql
+SELECT m.*,
+  (m.max_reservations - COALESCE(SUM(r.number_of_guests), 0)) as available_spots
+FROM meals m
+LEFT JOIN reservations r ON m.id = r.meal_id
+GROUP BY m.id;
 ```
 
-### Broken TypeScript config file
-This boilerplate does not use TypeScript, but Next which is used in the `app` package has built in support for TypeScript.
-This means that Next (or rather `esbuild` which is used internally) will look for a TypeScript config file (`tsconfig.json`) in the current folder and all parent folders until it finds one.
-If it does find a TypeScript config file but that file is invalid or empty you'll see errors like this:
+#### 2. Advanced Search & Filtering
 
-```
-✘ [ERROR] Unexpected end of file in JSON
+- Multi-criteria filtering (price, location, cuisine, availability)
+- Real-time search with debounced input
+- SQL optimization for fast query performance
 
-    ../../tsconfig.json:1:0:
-      1 │ 
-        ╵ ^
+#### 3. Authentication Flow
 
-failed to load config from /Users/milton/dev/hyf/hyf-project-template/app/next.config.js
-error when starting dev server:
-Error: Build failed with 1 error:
-../../tsconfig.json:1:0: ERROR: Unexpected end of file in JSON
-    at failureErrorWithLog (/Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:1651:15)
-    at /Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:1059:25
-    at runOnEndCallbacks (/Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:1486:45)
-    at buildResponseToResult (/Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:1057:7)
-    at /Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:1086:16
-    at responseCallbacks.<computed> (/Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:704:9)
-    at handleIncomingPacket (/Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:764:9)
-    at Socket.readFromStdout (/Users/milton/dev/hyf/hyf-project-template/app/node_modules/esbuild/lib/main.js:680:7)
-    at Socket.emit (node:events:519:28)
-    at addChunk (node:internal/streams/readable:559:12)
-```
+- JWT-based authentication with refresh tokens
+- Persistent sessions across page refreshes
+- Protected routes with middleware
+- Secure token handling with HTTP-only cookies
 
-There are 3 possible solutions:
-1. Delete the offending TypeScript config file
-2. Fix the issue in the file so that Next can use it
-3. Move your project folder to some place that doesn't put the TypeScript config file in the parent folder of your project folder
+#### 4. Review Aggregation
 
-## Architecture diagram
+- Real-time rating calculations
+- Review sorting and pagination
+- Spam prevention and content moderation
 
-![Architecture](./images/architecture.png)
+## 🌟 Key Learning Outcomes
 
-## Applying consistent formatting
+### Frontend Development
 
-Before you commit any changes you've made, you can run the command `npm run format` in either package to format the code using [Prettier](https://prettier.io/).
+- **Next.js App Router**: Modern React framework with server-side rendering
+- **Component Architecture**: Reusable, maintainable component design
+- **State Management**: Context API for global state with local component state
+- **CSS Modules**: Scoped styling preventing conflicts and improving maintainability
+- **Responsive Design**: Mobile-first approach with CSS Grid and Flexbox
 
-Using a consistent code style makes it easier to read code which improves productivity and avoid bugs.  
-When collaborating with other people, a code base should still look like it was written by a single person.
+### Backend Development
 
-## Checking for common code problems
+- **RESTful API Design**: Proper HTTP methods, status codes, and error handling
+- **Database Optimization**: Complex queries, indexing, and relationship management
+- **Authentication & Security**: JWT implementation, input validation, SQL injection prevention
+- **File Handling**: Image processing, compression, and storage strategies
 
-Before you commit your changes, you can use `npm run check` in either package to check for code issues using [ESLint](https://eslint.org/).
+### Full-Stack Integration
 
-ESLint is a "linter", a tool that scans your code for common code problems, this can help you avoid bugs and write better code.
+- **API Integration**: Seamless communication between frontend and backend
+- **Error Handling**: Comprehensive error management across the application
+- **Performance Optimization**: Image compression, lazy loading, efficient queries
+- **Deployment**: Production deployment with environment configuration
 
-## Deploying
+## 🚀 Production Deployment
 
-All 3 components (database, API, web app) can be deployed for free at [Render.com](https://render.com).
-Sign in using your Github account to make the process smoother.
-When you sign in you can specify which of your repositories you want Render.com to have access to.
+### Live Application
 
-[Database and API deployment instructions](./api/README.md#deploying)  
-[App deployment instructions](./app/README.md#deploying-a-static-web-app)
+- **Frontend**: Deployed on Render with optimized build
+- **Backend**: Express API on Render with PostgreSQL database
+- **Database**: Managed PostgreSQL with automated backups
+- **CDN**: Static asset optimization and global distribution
+
+## 🏆 Project Impact
+
+This project demonstrates:
+
+- **Full-Stack Expertise**: End-to-end application development with modern technologies
+- **User-Centered Design**: Focus on real user needs and seamless experiences
+- **Production Quality**: Deployment-ready code with proper error handling and security
+- **Community Building**: Platform that genuinely connects people through shared experiences
+- **Technical Excellence**: Clean code, proper architecture, and scalable design patterns
+
+## 🤝 Contributing
+
+This project showcases production-ready development practices:
+
+1. **Code Quality**: ESLint and Prettier for consistent formatting
+2. **Error Handling**: Comprehensive error management and user feedback
+3. **Security**: Input validation, SQL injection prevention, secure authentication
+4. **Performance**: Optimized queries, image compression, lazy loading
+5. **Accessibility**: Semantic HTML, ARIA labels, keyboard navigation support
+
+_Built with ❤️ for food lovers and community builders_
