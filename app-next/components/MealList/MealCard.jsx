@@ -32,46 +32,29 @@ export default function MealCard({
   const [authMode, setAuthMode] = useState("login");
   const { user, isAuthenticated } = useAuth();
 
-  // Helper function to get image source
   const getImageSrc = (raw) => {
     const PLACEHOLDER = "/placeholder-meal.svg";
     if (!raw || typeof raw !== "string") return PLACEHOLDER;
     const image = raw.trim();
-
-    // 1. Already a complete data URL
     if (image.startsWith("data:image/")) return image;
-
-    // 2. External absolute URL (http / https)
     if (/^https?:\/\//i.test(image)) return image;
-
-    // 3. Any static/public path (served from Next.js public/)
-    // Covers: /images/..., /uploads/... or other leading slash assets
     if (image.startsWith("/")) return image;
-
-    // 4. Heuristic: raw base64 without prefix (avoid false positives)
-    //    - long enough
-    //    - only base64 charset
-    //    - no whitespace
     if (
       image.length > 80 &&
       /^[A-Za-z0-9+/=]+$/.test(image) &&
       !image.includes(" ") &&
       !image.includes("\\n")
     ) {
-      // Basic content sniff: JPEG usually starts with /9j/, PNG with iVBOR
       const imageType = image.startsWith("/9j/")
         ? "jpeg"
         : image.startsWith("iVBOR")
         ? "png"
-        : "jpeg"; // default
+        : "jpeg";
       return `data:image/${imageType};base64,${image}`;
     }
-
-    // 5. Fallback
     return PLACEHOLDER;
   };
 
-  // Use internal state for non-single cards, external state for single cards
   const isShowingReservation = single
     ? showReservation
     : internalShowReservation;
@@ -83,7 +66,6 @@ export default function MealCard({
       setShowAuthModal(true);
       return;
     }
-
     if (single && onReservationToggle) {
       onReservationToggle();
     } else {
@@ -97,7 +79,6 @@ export default function MealCard({
       setShowAuthModal(true);
       return;
     }
-
     if (single && onReviewToggle) {
       onReviewToggle();
     } else {
@@ -117,8 +98,6 @@ export default function MealCard({
           <span className={styles.location}>{location}</span>
           <span className={styles.price}>€{price}</span>
         </div>
-
-        {/* Compact rating display for list cards */}
         <div className={styles.compactRating}>
           <Rating
             rating={averageRating || 0}
@@ -126,7 +105,6 @@ export default function MealCard({
             showCount={false}
           />
         </div>
-
         <div className={styles.availability}>
           <span
             className={`${styles.spotsLeft} ${
@@ -163,8 +141,6 @@ export default function MealCard({
           <span className={styles.location}>{location}</span>
           <span className={styles.price}>€{price}</span>
         </div>
-
-        {/* Rating display for single card */}
         <div className={styles.ratingSection}>
           <Rating
             rating={averageRating || 0}
@@ -212,16 +188,12 @@ export default function MealCard({
           </button>
         </div>
       </div>
-
-      {/* For non-single cards, show forms below */}
       {!single && internalShowReservation && (
         <ReservationForm mealId={id} showNotification={showNotification} />
       )}
       {!single && internalShowReview && (
         <ReviewForm mealId={id} showNotification={showNotification} />
       )}
-
-      {/* Authentication Modal */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
