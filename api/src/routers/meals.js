@@ -11,7 +11,8 @@ function isLikelyRawBase64(str) {
   if (!str || typeof str !== "string") return false;
   if (str.startsWith("data:")) return false;
   if (/^https?:\/\//i.test(str)) return false;
-  if (str.startsWith("/")) return false; // treat leading slash as path
+  // If it starts with a single slash but matches typical base64 beginning (e.g. /9j/ for jpeg), still allow.
+  if (str.startsWith("/") && !str.startsWith("/9j/")) return false; // treat other leading slash as path
   if (str.length < 80) return false; // too short to be full image
   if (!/^[A-Za-z0-9+/=]+$/.test(str)) return false;
   return true;

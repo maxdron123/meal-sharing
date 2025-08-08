@@ -36,9 +36,11 @@ export default function MealCard({
     const PLACEHOLDER = "/placeholder-meal.svg";
     if (!raw || typeof raw !== "string") return PLACEHOLDER;
     const image = raw.trim();
+    // 1. Full data URL already
     if (image.startsWith("data:image/")) return image;
+    // 2. External URL
     if (/^https?:\/\//i.test(image)) return image;
-    if (image.startsWith("/")) return image;
+    // 3. Raw base64 (including leading '/9j/' jpeg case) BEFORE generic leading-slash path handling
     if (
       image.length > 80 &&
       /^[A-Za-z0-9+/=]+$/.test(image) &&
@@ -52,6 +54,8 @@ export default function MealCard({
         : "jpeg";
       return `data:image/${imageType};base64,${image}`;
     }
+    // 4. Leading slash path (public asset or upload)
+    if (image.startsWith("/")) return image;
     return PLACEHOLDER;
   };
 

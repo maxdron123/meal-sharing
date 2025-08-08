@@ -110,7 +110,7 @@ usersRouter.post("/", validateNewUser, async (req, res) => {
         .json({ message: "User with this email already exists" });
     }
 
-    const [newUserId] = await knex("users").insert({
+    const insertPayload = {
       email,
       password_hash,
       first_name,
@@ -121,25 +121,42 @@ usersRouter.post("/", validateNewUser, async (req, res) => {
       is_active: is_active !== undefined ? is_active : true,
       created_at: new Date(),
       updated_at: new Date(),
-    });
+    };
 
-    // Get the created user (without password)
-    const newUser = await knex("users")
-      .select(
-        "id",
-        "email",
-        "first_name",
-        "last_name",
-        "phone_number",
-        "profile_image",
-        "email_verified",
-        "is_active",
-        "created_at"
-      )
-      .where({ id: newUserId })
-      .first();
-
-    res.status(201).json(newUser);
+    if (knex.client.config.client === "pg") {
+      const [created] = await knex("users")
+        .insert(insertPayload)
+        .returning([
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          "phone_number",
+          "profile_image",
+          "email_verified",
+          "is_active",
+          "created_at",
+          "updated_at",
+        ]);
+      return res.status(201).json(created);
+    } else {
+      const [newUserId] = await knex("users").insert(insertPayload);
+      const newUser = await knex("users")
+        .select(
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          "phone_number",
+          "profile_image",
+          "email_verified",
+          "is_active",
+          "created_at"
+        )
+        .where({ id: newUserId })
+        .first();
+      return res.status(201).json(newUser);
+    }
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ message: "Internal server error" });
