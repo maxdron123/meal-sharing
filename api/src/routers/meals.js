@@ -6,6 +6,17 @@ import { validate } from "../validate_middleware.js";
 
 export const mealsRouter = express.Router();
 
+// Helper: detect raw base64 blob (not already data:, not URL, no slash path)
+function isLikelyRawBase64(str) {
+  if (!str || typeof str !== "string") return false;
+  if (str.startsWith("data:")) return false;
+  if (/^https?:\/\//i.test(str)) return false;
+  if (str.startsWith("/")) return false; // treat leading slash as path
+  if (str.length < 80) return false; // too short to be full image
+  if (!/^[A-Za-z0-9+/=]+$/.test(str)) return false;
+  return true;
+}
+
 mealsRouter.get("/", async (req, res) => {
   const {
     maxPrice,
@@ -132,10 +143,8 @@ mealsRouter.get("/", async (req, res) => {
     }
     const meals = await query;
 
-    // Convert base64 images to data URLs with proper type detection
     const mealsWithImages = meals.map((meal) => {
-      if (meal.image && !meal.image.startsWith("data:")) {
-        // Basic image type detection based on base64 header
+      if (isLikelyRawBase64(meal.image)) {
         const imageType = meal.image.startsWith("/9j/") ? "jpeg" : "png";
         meal.image = `data:image/${imageType};base64,${meal.image}`;
       }
@@ -227,10 +236,8 @@ mealsRouter.get("/user/:userId", async (req, res) => {
       .where("meals.created_by", userId)
       .orderBy("meals.id", "desc");
 
-    // Convert base64 images to data URLs with proper type detection
     const mealsWithImages = meals.map((meal) => {
-      if (meal.image && !meal.image.startsWith("data:")) {
-        // Basic image type detection based on base64 header
+      if (isLikelyRawBase64(meal.image)) {
         const imageType = meal.image.startsWith("/9j/") ? "jpeg" : "png";
         meal.image = `data:image/${imageType};base64,${meal.image}`;
       }
@@ -283,9 +290,7 @@ mealsRouter.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Meal not found" });
     }
 
-    // Convert base64 image to data URL with proper type detection
-    if (meal.image && !meal.image.startsWith("data:")) {
-      // Basic image type detection based on base64 header
+    if (isLikelyRawBase64(meal.image)) {
       const imageType = meal.image.startsWith("/9j/") ? "jpeg" : "png";
       meal.image = `data:image/${imageType};base64,${meal.image}`;
     }
