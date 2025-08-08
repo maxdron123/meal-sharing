@@ -91,31 +91,36 @@ export default function MyMealsPage() {
     }
   };
 
-  const getImageSrc = (image) => {
-    if (!image) return "/placeholder-meal.svg";
+  const getImageSrc = (raw) => {
+    const PLACEHOLDER = "/placeholder-meal.svg";
+    if (!raw || typeof raw !== "string") return PLACEHOLDER;
+    const image = raw.trim();
 
-    // If it's already a complete data URL, use it directly
-    if (image.startsWith("data:image/")) {
-      return image;
-    }
+    // 1. Full data URL
+    if (image.startsWith("data:image/")) return image;
 
-    // If it's base64 without data URL prefix, add it
+    // 2. External http(s) URL
+    if (/^https?:\/\//i.test(image)) return image;
+
+    // 3. Any leading slash path from public/
+    if (image.startsWith("/")) return image;
+
+    // 4. Raw base64 (no prefix) heuristic
     if (
-      image.length > 100 &&
-      !image.startsWith("http") &&
-      !image.startsWith("/")
+      image.length > 80 &&
+      /^[A-Za-z0-9+/=]+$/.test(image) &&
+      !image.includes(" ") &&
+      !image.includes("\\n")
     ) {
-      // Basic type detection - JPEG starts with /9j/, PNG with iVBOR
-      const imageType = image.startsWith("/9j/") ? "jpeg" : "png";
+      const imageType = image.startsWith("/9j/")
+        ? "jpeg"
+        : image.startsWith("iVBOR")
+        ? "png"
+        : "jpeg";
       return `data:image/${imageType};base64,${image}`;
     }
 
-    // If it's a file path (legacy), use it as before
-    if (image.startsWith("/uploads/")) {
-      return image;
-    }
-
-    return "/placeholder-meal.svg";
+    return PLACEHOLDER;
   };
 
   const getStatusColor = (meal) => {

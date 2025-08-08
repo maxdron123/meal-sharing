@@ -33,32 +33,42 @@ export default function MealCard({
   const { user, isAuthenticated } = useAuth();
 
   // Helper function to get image source
-  const getImageSrc = (image) => {
-    if (!image) return "/placeholder-meal.svg";
+  const getImageSrc = (raw) => {
+    const PLACEHOLDER = "/placeholder-meal.svg";
+    if (!raw || typeof raw !== "string") return PLACEHOLDER;
+    const image = raw.trim();
 
-    // If it's already a complete data URL, use it directly
-    if (image.startsWith("data:image/")) {
-      return image;
-    }
+    // 1. Already a complete data URL
+    if (image.startsWith("data:image/")) return image;
 
-    // If it's base64 without data URL prefix, add it
+    // 2. External absolute URL (http / https)
+    if (/^https?:\/\//i.test(image)) return image;
+
+    // 3. Any static/public path (served from Next.js public/)
+    // Covers: /images/..., /uploads/... or other leading slash assets
+    if (image.startsWith("/")) return image;
+
+    // 4. Heuristic: raw base64 without prefix (avoid false positives)
+    //    - long enough
+    //    - only base64 charset
+    //    - no whitespace
     if (
-      image.length > 100 &&
-      !image.startsWith("http") &&
-      !image.startsWith("/")
+      image.length > 80 &&
+      /^[A-Za-z0-9+/=]+$/.test(image) &&
+      !image.includes(" ") &&
+      !image.includes("\\n")
     ) {
-      // Basic type detection - JPEG starts with /9j/, PNG with iVBOR
-      const imageType = image.startsWith("/9j/") ? "jpeg" : "png";
+      // Basic content sniff: JPEG usually starts with /9j/, PNG with iVBOR
+      const imageType = image.startsWith("/9j/")
+        ? "jpeg"
+        : image.startsWith("iVBOR")
+        ? "png"
+        : "jpeg"; // default
       return `data:image/${imageType};base64,${image}`;
     }
 
-    // If it's a file path (legacy), use it as before
-    if (image.startsWith("/uploads/")) {
-      return image;
-    }
-
-    // Fallback to placeholder
-    return "/placeholder-meal.svg";
+    // 5. Fallback
+    return PLACEHOLDER;
   };
 
   // Use internal state for non-single cards, external state for single cards
