@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import api from "@/utils/api";
 import Cookies from "js-cookie";
 import styles from "./CreateMealForm.module.css";
 
@@ -165,23 +166,32 @@ export default function CreateMealForm({
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch("/api/meals", {
+      const response = await fetch(api("/meals"), {
         method: "POST",
         body: JSON.stringify(submitData),
         credentials: "include",
         headers: headers,
       });
 
-      const data = await response.json();
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // tolerate empty or non-JSON responses while still treating 2xx as success
+        data = null;
+      }
 
       if (response.ok) {
         if (showNotification) {
           showNotification("Meal created successfully!", "success");
         }
-        onMealCreated(data.meal);
+        onMealCreated(data?.meal || null);
       } else {
         console.error("Failed to create meal:", data);
-        setError(data.message || "Failed to create meal");
+        setError(
+          (data && (data.error || data.message)) ||
+            `Failed to create meal (status ${response.status})`
+        );
       }
     } catch (error) {
       console.error("Network error creating meal:", error);

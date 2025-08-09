@@ -34,6 +34,12 @@ export default function ReservationForm({
               created_date: new Date().toISOString().slice(0, 10),
             }),
           });
+          let data = null;
+          try {
+            data = await res.json();
+          } catch (_) {
+            // ignore non-JSON body on success
+          }
           if (res.ok) {
             if (showNotification) {
               showNotification("Reservation created successfully!", "success");
@@ -41,14 +47,13 @@ export default function ReservationForm({
               alert("Reservation created successfully!");
             }
             form.reset();
-            if (onSuccess) onSuccess();
+            if (onSuccess) onSuccess(data?.reservation || null);
           } else {
-            const error = await res.text();
-            if (showNotification) {
-              showNotification("Reservation failed: " + error, "error");
-            } else {
-              alert("Reservation failed: " + error);
-            }
+            let msg =
+              (data && (data.error || data.message)) || (await res.text());
+            if (showNotification)
+              showNotification("Reservation failed: " + msg, "error");
+            else alert("Reservation failed: " + msg);
           }
         } catch (err) {
           if (showNotification) {

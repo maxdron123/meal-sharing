@@ -28,6 +28,12 @@ export default function ReviewForm({ mealId, onSuccess, showNotification }) {
               created_date: new Date().toISOString().slice(0, 10),
             }),
           });
+          let data = null;
+          try {
+            data = await res.json();
+          } catch (_) {
+            // ignore non-JSON body on success
+          }
           if (res.ok) {
             if (showNotification) {
               showNotification("Review submitted successfully!", "success");
@@ -35,14 +41,13 @@ export default function ReviewForm({ mealId, onSuccess, showNotification }) {
               alert("Review submitted successfully!");
             }
             form.reset();
-            if (onSuccess) onSuccess();
+            if (onSuccess) onSuccess(data?.review || null);
           } else {
-            const error = await res.text();
-            if (showNotification) {
-              showNotification("Review failed: " + error, "error");
-            } else {
-              alert("Review failed: " + error);
-            }
+            let msg =
+              (data && (data.error || data.message)) || (await res.text());
+            if (showNotification)
+              showNotification("Review failed: " + msg, "error");
+            else alert("Review failed: " + msg);
           }
         } catch (err) {
           if (showNotification) {
