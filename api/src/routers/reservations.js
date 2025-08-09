@@ -1,6 +1,5 @@
 import express from "express";
 import knex from "../database_client.js";
-import { StatusCodes } from "http-status-codes";
 import { validations } from "./reservations_validator.js";
 import { validate } from "../validate_middleware.js";
 
@@ -68,16 +67,40 @@ reservationsRouter.post("/", validate(validations.create), async (req, res) => {
       contact_email,
       user_id,
     };
-    const [reservationID] = await knex("reservations")
-      .insert(newReservation)
-      .returning("id");
-    const createdReservation = await knex("reservations")
-      .where({ id: reservationID })
-      .first();
-    res
-      .status(201)
-      .send(`Created reservation for ${createdReservation.contact_name}!`);
-  } catch {
+    // Handle PostgreSQL vs others consistently
+    if (
+      knex.client &&
+      knex.client.config &&
+      knex.client.config.client === "pg"
+    ) {
+      const [created] = await knex("reservations")
+        .insert(newReservation)
+        .returning([
+          "id",
+          "number_of_guests",
+          "meal_id",
+          "created_date",
+          "contact_phonenumber",
+          "contact_name",
+          "contact_email",
+          "user_id",
+        ]);
+      return res.status(201).json({
+        message: `Created reservation for ${created.contact_name}!`,
+        reservation: created,
+      });
+    } else {
+      const [reservationId] = await knex("reservations").insert(newReservation);
+      const created = await knex("reservations")
+        .where({ id: reservationId })
+        .first();
+      return res.status(201).json({
+        message: `Created reservation for ${created.contact_name}!`,
+        reservation: created,
+      });
+    }
+  } catch (error) {
+    console.error("Error creating reservation:", error);
     res.status(500).json({ error: "Failed to create reservation" });
   }
 });

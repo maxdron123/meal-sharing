@@ -191,13 +191,40 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
       image,
       created_by,
     };
-    const [mealId] = await knex("meals").insert(newMeal);
-    const createdMeal = await knex("meals").where({ id: mealId }).first();
-    res.status(201).json({
-      message: `Created meal ${createdMeal.title}!`,
-      meal: createdMeal,
-    });
-  } catch {
+    // PostgreSQL requires .returning(...) to get inserted row; others return inserted id
+    if (
+      knex.client &&
+      knex.client.config &&
+      knex.client.config.client === "pg"
+    ) {
+      const [created] = await knex("meals")
+        .insert(newMeal)
+        .returning([
+          "id",
+          "title",
+          "description",
+          "location",
+          "when",
+          "max_reservations",
+          "price",
+          "created_date",
+          "image",
+          "created_by",
+        ]);
+      return res.status(201).json({
+        message: `Created meal ${created.title}!`,
+        meal: created,
+      });
+    } else {
+      const [mealId] = await knex("meals").insert(newMeal);
+      const createdMeal = await knex("meals").where({ id: mealId }).first();
+      return res.status(201).json({
+        message: `Created meal ${createdMeal.title}!`,
+        meal: createdMeal,
+      });
+    }
+  } catch (error) {
+    console.error("Error creating meal:", error);
     res.status(500).json({ error: "Failed to create meal" });
   }
 });

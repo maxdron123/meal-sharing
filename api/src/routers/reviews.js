@@ -40,12 +40,11 @@ reviewsRouter.get("/user/:userId", async (req, res) => {
 });
 
 reviewsRouter.post("/", validate(validations.create), async (req, res) => {
-  const { id, title, description, meal_id, stars, created_date, user_id } =
+  const { title, description, meal_id, stars, created_date, user_id } =
     req.body;
 
   try {
     const newReview = {
-      id,
       title,
       description,
       meal_id,
@@ -53,9 +52,36 @@ reviewsRouter.post("/", validate(validations.create), async (req, res) => {
       created_date: created_date || new Date().toISOString().split("T")[0],
       user_id,
     };
-    await knex("reviews").insert(newReview);
-    res.status(201).end();
-  } catch {
+    if (
+      knex.client &&
+      knex.client.config &&
+      knex.client.config.client === "pg"
+    ) {
+      const [created] = await knex("reviews")
+        .insert(newReview)
+        .returning([
+          "id",
+          "title",
+          "description",
+          "meal_id",
+          "stars",
+          "created_date",
+          "user_id",
+        ]);
+      return res.status(201).json({
+        message: `Created review for meal ${created.meal_id}`,
+        review: created,
+      });
+    } else {
+      const [reviewId] = await knex("reviews").insert(newReview);
+      const created = await knex("reviews").where({ id: reviewId }).first();
+      return res.status(201).json({
+        message: `Created review for meal ${created.meal_id}`,
+        review: created,
+      });
+    }
+  } catch (error) {
+    console.error("Error creating review:", error);
     res.status(500).json({ error: "Failed to create review" });
   }
 });
