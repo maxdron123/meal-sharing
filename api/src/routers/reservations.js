@@ -67,12 +67,16 @@ reservationsRouter.post("/", validate(validations.create), async (req, res) => {
       contact_email,
       user_id,
     };
-    // Handle PostgreSQL vs others consistently
-    if (
-      knex.client &&
-      knex.client.config &&
-      knex.client.config.client === "pg"
-    ) {
+
+    const clientName =
+      (knex &&
+        knex.client &&
+        knex.client.config &&
+        knex.client.config.client) ||
+      "";
+    const isPg =
+      typeof clientName === "string" && /pg|postgre/i.test(clientName);
+    if (isPg) {
       const [created] = await knex("reservations")
         .insert(newReservation)
         .returning([
@@ -101,6 +105,19 @@ reservationsRouter.post("/", validate(validations.create), async (req, res) => {
     }
   } catch (error) {
     console.error("Error creating reservation:", error);
+    if (error && error.code) {
+      if (error.code === "23503") {
+        return res
+          .status(400)
+          .json({ error: "Invalid meal_id or user_id (FK constraint)" });
+      }
+      if (error.code === "23502") {
+        return res.status(400).json({ error: "Missing required field" });
+      }
+      if (error.code === "23514") {
+        return res.status(400).json({ error: "Constraint violation" });
+      }
+    }
     res.status(500).json({ error: "Failed to create reservation" });
   }
 });

@@ -82,6 +82,22 @@ reviewsRouter.post("/", validate(validations.create), async (req, res) => {
     }
   } catch (error) {
     console.error("Error creating review:", error);
+    // Map common PostgreSQL errors to 4xx with clearer messages
+    if (error && error.code) {
+      if (error.code === "23503") {
+        return res
+          .status(400)
+          .json({ error: "Invalid meal_id or user_id (FK constraint)" });
+      }
+      if (error.code === "23505") {
+        return res
+          .status(409)
+          .json({ error: "Duplicate review violates unique constraint" });
+      }
+      if (error.code === "23502") {
+        return res.status(400).json({ error: "Missing required field" });
+      }
+    }
     res.status(500).json({ error: "Failed to create review" });
   }
 });

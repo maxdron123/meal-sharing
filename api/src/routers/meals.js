@@ -191,12 +191,16 @@ mealsRouter.post("/", validate(validations.create), async (req, res) => {
       image,
       created_by,
     };
-    // PostgreSQL requires .returning(...) to get inserted row; others return inserted id
-    if (
-      knex.client &&
-      knex.client.config &&
-      knex.client.config.client === "pg"
-    ) {
+    // Detect PostgreSQL (supports both 'pg' and 'postgresql') to use .returning(...)
+    const clientName =
+      (knex &&
+        knex.client &&
+        knex.client.config &&
+        knex.client.config.client) ||
+      "";
+    const isPg =
+      typeof clientName === "string" && /pg|postgre/i.test(clientName);
+    if (isPg) {
       const [created] = await knex("meals")
         .insert(newMeal)
         .returning([
